@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+        <record id="acabado_view_tree" model="ir.ui.view">
+            <field name="name">acabado.view.tree</field>
+            <field name="model">eclipse.cotizacion.acabado</field>
+            <field name="arch" type="xml">
+                <tree string="Acabado" editable="top">
+                    <field name="acabado"/>
+                    <field name="tipo"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="act_open_acabado" model="ir.actions.act_window">
+            <field name="name">Acabados</field>
+            <field name="res_model">eclipse.cotizacion.acabado</field>
+            <field name="view_mode">list</field>
+            <field name="view_type">tree</field>
+        </record>
+        
+        <menuitem action="act_open_acabado" id="menu_open_acabado"
+            parent="eclipse_coti.menu_coti_conf" sequence="2"/>
+            
+
+    </data>
+</openerp>

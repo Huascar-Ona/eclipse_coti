@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Vista de arbol-->
+        <record id="cotizacion_view_tree" model="ir.ui.view">
+            <field name="name">cotizacion.view.tree</field>
+            <field name="model">eclipse.cotizacion</field>
+            <field name="arch" type="xml">
+                <tree string="Cotizaciones">
+                    <field name="name"/>
+                    <field name="fecha"/>
+                    <field name="empresa"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Formulario-->
+        <record id="cotizacion_view_form" model="ir.ui.view">
+            <field name="name">cotizacion.view.form</field>
+            <field name="model">eclipse.cotizacion</field>
+            <field name="arch" type="xml">
+                <form string="Cotizaciones">
+                    <header>
+                        <button name="action_solicitar_cotizacion" type="object" string="Solicitar cotización"
+                            states="draft" confirm="Revise que los datos sean correctos. ¡¡La información ya no se podrá modificar!!."/>
+                        <button name="action_solicitar_validacion" type="object" string="Solicitar validación"
+                            states="submitted"/>
+                        <button name="action_validar" type="object" string="Validar"
+                            states="validating"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group string="Datos">
+                            <group>
+                                <field name="name"/>
+                                <field name="fecha"/>
+                                <field name="tiempo_de_entrega"/>
+                            </group>
+                            <group>
+                                <field name="agente"/>
+                                <field name="atencion_a"/>
+                                <field name="empresa"/>
+                                <field name="tel"/>
+                            </group>
+                        </group>
+                        <group string="Opciones del proceso" style="width:33%%">
+                            <field name="diseno"/>
+                            <field name="opcion1" on_change="onchange_opcion1(opcion1)"
+                                options="{'no_quick_create':True,'no_create_edit':True}"/>
+                            <field name="opcion2" on_change="onchange_opcion2(opcion2)" 
+                                domain="[('id','=',0)]"
+                                options="{'no_quick_create':True,'no_create_edit':True}"/>
+                            <field name="opcion3" on_change="onchange_opcion3(opcion3)"
+                                domain="[('id','=',0)]"
+                                options="{'no_quick_create':True,'no_create_edit':True}"/>
+                            <field name="show_otro" invisible="1"/>
+                            <field name="opcion_otro" attrs="{'invisible':[('show_otro','=',False)],
+                                'required': [('show_otro','=',True)]}"/>
+                            <field name="es_editorial" invisible="1"/>
+                        </group>
+                        <group attrs="{'invisible':[('opcion3','=',False)]}">
+                            <group>
+                                <separator string="Forros" colspan="2"
+                                    attrs="{'invisible':[('es_editorial','=',False)]}"/>
+                                <label string="Medida extendida en cm"/>
+                                <div>
+                                    <field name="largo_ext" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="ancho_ext" class="oe_inline"/>
+                                </div>
+                                <label string="Medida final en cm"/>
+                                <div>
+                                    <field name="largo_final" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="ancho_final" class="oe_inline"/>
+                                </div>
+                                <label string="Tintas"/>
+                                <div>
+                                    <field name="tintas_a" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="tintas_b" class="oe_inline"/>
+                                </div>
+                                <label string="Pantone"/>
+                                <div>
+                                    <field name="pantone"/>
+                                </div>
+                                <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
+                                <div attrs="{'invisible':[('es_editorial','=',False)]}">
+                                    <field name="n_paginas"/>
+                                </div>
+                                <label string="Tipo de papel"/>
+                                <div>
+                                    <field name="papel"/>
+                                    <label string="Otro" class="oe_inline"/>
+                                    <field name="papel_otro" class="oe_inline" placeholder="Especificar"/>
+                                </div>
+                            </group>
+                            <group attrs="{'invisible':[('es_editorial','=',False)]}">
+                                <separator string="Interiores" colspan="2"/>
+                                <label string="Medida extendida en cm"/>
+                                <div>
+                                    <field name="largo_ext_int" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="ancho_ext_int" class="oe_inline"/>
+                                </div>
+                                <label string="Medida final en cm"/>
+                                <div>
+                                    <field name="largo_final_int" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="ancho_final_int" class="oe_inline"/>
+                                </div>
+                                <label string="Tintas"/>
+                                <div>
+                                    <field name="tintas_a_int" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="tintas_b_int" class="oe_inline"/>
+                                </div>
+                                <label string="Pantone"/>
+                                <div>
+                                    <field name="pantone_int"/>
+                                </div>
+                                <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
+                                <div attrs="{'invisible':[('es_editorial','=',False)]}">
+                                    <field name="n_paginas_int" class="oe_inline"/>
+                                    <field name="tipo_paginas_int" class="oe_inline"/>
+                                </div>
+                                <label string="Tipo de papel"/>
+                                <div>
+                                    <field name="papel_int"/>
+                                    <label string="Otro" class="oe_inline"/>
+                                    <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"/>
+                                </div>
+                            </group>
+                        </group>
+                        <div attrs="{'invisible':[('opcion3','=',False)]}">
+                            <separator string="Acabados" colspan="2"/>
+                            <field name="acabados" colspan="2"/>
+                            <group attrs="{'invisible':[('es_editorial','=',False)]}">
+                                <field name="tipo_encuadernado" style="width:33%"/>
+                            </group>
+                            
+                            <separator string="Precios" colspan="2"/>
+                            <field name="precios"/>
+                            
+                            <separator string="Validaciones" colspan="2"/>
+                            <field name="validaciones" readonly="1">
+                                <tree string="Validaciones">
+                                    <field name="user_id"/>
+                                    <field name="create_date"/>
+                                </tree>
+                            </field>
+
+                            <separator string="Observaciones" colspan="2"/>
+                            <field name="observaciones" colspan="2"/>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="cotizacion_view_form_draft" model="ir.ui.view">
+            <field name="name">cotizacion.view.form.draft (no editar precios)</field>
+            <field name="model">eclipse.cotizacion</field>
+            <field name="inherit_id" ref="eclipse_coti.cotizacion_view_form"/>
+            <field name="arch" type="xml">
+                <field name="precios" position="replace">
+                    <field name="precios" colspan="2">
+                        <tree string="Precios" editable="bottom">
+                            <field name="cantidad"/>
+                            <field name="precio_unitario" readonly="1"/>
+                            <field name="observacion" readonly="1"/>
+                        </tree>
+                    </field>
+                </field>
+            </field>
+            <field name="groups_id" eval="[(6,0,[ref('eclipse_coti.grupo_requisicion')])]"/>
+        </record>
+
+        <record id="cotizacion_view_form_submitted" model="ir.ui.view">
+            <field name="name">cotizacion.view.form.submitted(sí editar precios)</field>
+            <field name="model">eclipse.cotizacion</field>
+            <field name="inherit_id" ref="eclipse_coti.cotizacion_view_form"/>
+            <field name="arch" type="xml">
+                <field name="precios" position="replace">
+                    <field name="precios" colspan="2">
+                        <tree string="Precios" editable="bottom">
+                            <field name="cantidad"/>
+                            <field name="precio_unitario"/>
+                            <field name="observacion"/>
+                        </tree>
+                    </field>
+                </field>
+            </field>
+            <field name="groups_id" eval="[(6,0,[ref('eclipse_coti.grupo_cotizacion')])]"/>
+        </record>
+        
+        <!-- Acción y menú -->
+        <record id="act_open_cotizacion_1" model="ir.actions.act_window">
+            <field name="name">Requisiciones</field>
+            <field name="res_model">eclipse.cotizacion</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_type">tree</field>
+            <field name="domain">[('state','=','draft')]</field>
+        </record>
+
+        <menuitem action="act_open_cotizacion_1" id="menu_open_cotizacion_1"
+            parent="eclipse_coti.menu_coti" sequence="10"
+            groups="eclipse_coti.grupo_requisicion"/>
+
+        <record id="act_open_cotizacion_2" model="ir.actions.act_window">
+            <field name="name">Cotizaciones</field>
+            <field name="res_model">eclipse.cotizacion</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_type">tree</field>
+            <field name="domain">[('state','!=','draft')]</field>
+        </record>
+
+        <menuitem action="act_open_cotizacion_2" id="menu_open_cotizacion_2"
+            parent="eclipse_coti.menu_coti" sequence="20"
+            groups="eclipse_coti.grupo_cotizacion"/>
+
+        <!-- Secuencia -->
+        <record id="codigo_secuencia_cotizacion" model="ir.sequence.type">
+            <field name="name">Secuencia de las cotizaciones</field>
+            <field name="code">secuencia.cotizacion</field>
+        </record>
+
+        <record id="secuencia_cotizacion" model="ir.sequence">
+            <field name="name">Secuencia de las cotizaciones</field>
+            <field name="code">secuencia.cotizacion</field>
+            <field name="padding" eval="5"/>
+            <field name="prefix">C</field>
+            <field name="implementation">no_gap</field>
+        </record>
+    </data>
+</openerp>
+

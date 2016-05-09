@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <menuitem id="menu_eclipse_coti_main" name="Cotización" sequence="50"
+            groups="eclipse_coti.grupo_requisicion,eclipse_coti.grupo_cotizacion"/>
+
+      	<menuitem id="menu_coti" name="Cotización"
+            parent="eclipse_coti.menu_eclipse_coti_main" sequence="1"/>
+
+      	<menuitem id="menu_coti_conf" name="Configuración"
+            parent="eclipse_coti.menu_eclipse_coti_main" sequence="2"/>
+
+    </data>
+</openerp>
