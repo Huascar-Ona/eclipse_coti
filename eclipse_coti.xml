@@ -9,7 +9,8 @@
             parent="eclipse_coti.menu_eclipse_coti_main" sequence="1"/>
 
       	<menuitem id="menu_coti_conf" name="Configuración"
-            parent="eclipse_coti.menu_eclipse_coti_main" sequence="2"/>
+            parent="eclipse_coti.menu_eclipse_coti_main" sequence="2"
+            groups="eclipse_coti.grupo_cotizacion"/>
 
     </data>
 </openerp>

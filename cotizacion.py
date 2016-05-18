@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from openerp import models, fields, api
 from openerp.osv import osv
+from datetime import datetime
 
 OPCIONES_1 = {
     'Offset': ['Editorial', 'Producto'],
     'Digital': ['Editorial', 'Producto'],
-    'Plotter': ['Editorial']    
+    'Plotter': ['Producto']    
 }
 
 OPCIONES_2 = {
@@ -16,18 +17,23 @@ OPCIONES_2 = {
 class opcion(models.Model):
     _name = "eclipse.cotizacion.opcion"
     
-    name = fields.Char("Nombre")
+    name = fields.Char("Nombre", required=True)
+
+class vendedor(models.Model):
+    _name = "eclipse.vendedor"
+
+    name = fields.Char("Nombre", required=True)
 
 class cotizacion(models.Model):
     _name = "eclipse.cotizacion"
 
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
-    fecha = fields.Date("Fecha", readonly=True, states={'draft':[('readonly',False)]})
-    tiempo_de_entrega = fields.Char("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
-    agente = fields.Char("Agente", readonly=True, states={'draft':[('readonly',False)]})
+    fecha = fields.Datetime("Fecha", readonly=True, states={'draft':[('readonly',False)]}, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
+    agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
-    empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]})
+    empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
     
     #Opciones
@@ -41,16 +47,16 @@ class cotizacion(models.Model):
     
     #Para Produto y para Editorial - Forros:
     #Medida extendida en cm
-    largo_ext = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]})
-    ancho_ext = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]})
+    largo_ext = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    ancho_ext = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Medida final en cm
-    largo_final = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]})
-    ancho_final = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]})
+    largo_final = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    ancho_final = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
-    tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
-    tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Pantone
-    pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
+    pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #No. páginas (solo Forros)
     n_paginas = fields.Integer(u"No. Páginas", readonly=True, states={'draft':[('readonly',False)]})
     

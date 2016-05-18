@@ -26,9 +26,9 @@
                         <button name="action_solicitar_cotizacion" type="object" string="Solicitar cotización"
                             states="draft" confirm="Revise que los datos sean correctos. ¡¡La información ya no se podrá modificar!!."/>
                         <button name="action_solicitar_validacion" type="object" string="Solicitar validación"
-                            states="submitted"/>
+                            states="submitted" groups="eclipse_coti.grupo_cotizacion"/>
                         <button name="action_validar" type="object" string="Validar"
-                            states="validating"/>
+                            states="validating" groups="eclipse_coti.grupo_cotizacion"/> 
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -48,19 +48,62 @@
                         <group string="Opciones del proceso" style="width:33%%">
                             <field name="diseno"/>
                             <field name="opcion1" on_change="onchange_opcion1(opcion1)"
-                                options="{'no_quick_create':True,'no_create_edit':True}"/>
+                                options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
                             <field name="opcion2" on_change="onchange_opcion2(opcion2)" 
                                 domain="[('id','=',0)]"
-                                options="{'no_quick_create':True,'no_create_edit':True}"/>
+                                options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
                             <field name="opcion3" on_change="onchange_opcion3(opcion3)"
                                 domain="[('id','=',0)]"
-                                options="{'no_quick_create':True,'no_create_edit':True}"/>
+                                options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
                             <field name="show_otro" invisible="1"/>
                             <field name="opcion_otro" attrs="{'invisible':[('show_otro','=',False)],
                                 'required': [('show_otro','=',True)]}"/>
                             <field name="es_editorial" invisible="1"/>
                         </group>
                         <group attrs="{'invisible':[('opcion3','=',False)]}">
+                            <group attrs="{'invisible':[('es_editorial','=',False)]}">
+                                <separator string="Interiores" colspan="2"/>
+                                <label string="Medida extendida en cm"/>
+                                <div>
+                                    <field name="largo_ext_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="ancho_ext_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                </div>
+                                <label string="Medida final en cm"/>
+                                <div>
+                                    <field name="largo_final_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="ancho_final_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                </div>
+                                <label string="Tintas"/>
+                                <div>
+                                    <field name="tintas_a_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="tintas_b_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                </div>
+                                <label string="Pantone"/>
+                                <div>
+                                    <field name="pantone_int"/>
+                                </div>
+                                <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
+                                <div attrs="{'invisible':[('es_editorial','=',False)]}">
+                                    <field name="n_paginas_int" class="oe_inline"/>
+                                    <field name="tipo_paginas_int" class="oe_inline"/>
+                                </div>
+                                <label string="Tipo de papel"/>
+                                <div>
+                                    <field name="papel_int"
+                                        attrs="{'required': [('papel_otro_int','=',False)]}"/>
+                                    <label string="Otro" class="oe_inline"/>
+                                    <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"/>
+                                </div>
+                            </group>
                             <group>
                                 <separator string="Forros" colspan="2"
                                     attrs="{'invisible':[('es_editorial','=',False)]}"/>
@@ -92,54 +135,19 @@
                                 </div>
                                 <label string="Tipo de papel"/>
                                 <div>
-                                    <field name="papel"/>
+                                    <field name="papel"
+                                        attrs="{'required': [('papel_otro','=',False)]}"/>
                                     <label string="Otro" class="oe_inline"/>
                                     <field name="papel_otro" class="oe_inline" placeholder="Especificar"/>
                                 </div>
                             </group>
-                            <group attrs="{'invisible':[('es_editorial','=',False)]}">
-                                <separator string="Interiores" colspan="2"/>
-                                <label string="Medida extendida en cm"/>
-                                <div>
-                                    <field name="largo_ext_int" class="oe_inline"/>
-                                    <label string="x" class="oe_inline"/>
-                                    <field name="ancho_ext_int" class="oe_inline"/>
-                                </div>
-                                <label string="Medida final en cm"/>
-                                <div>
-                                    <field name="largo_final_int" class="oe_inline"/>
-                                    <label string="x" class="oe_inline"/>
-                                    <field name="ancho_final_int" class="oe_inline"/>
-                                </div>
-                                <label string="Tintas"/>
-                                <div>
-                                    <field name="tintas_a_int" class="oe_inline"/>
-                                    <label string="x" class="oe_inline"/>
-                                    <field name="tintas_b_int" class="oe_inline"/>
-                                </div>
-                                <label string="Pantone"/>
-                                <div>
-                                    <field name="pantone_int"/>
-                                </div>
-                                <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
-                                <div attrs="{'invisible':[('es_editorial','=',False)]}">
-                                    <field name="n_paginas_int" class="oe_inline"/>
-                                    <field name="tipo_paginas_int" class="oe_inline"/>
-                                </div>
-                                <label string="Tipo de papel"/>
-                                <div>
-                                    <field name="papel_int"/>
-                                    <label string="Otro" class="oe_inline"/>
-                                    <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"/>
-                                </div>
-                            </group>
                         </group>
                         <div attrs="{'invisible':[('opcion3','=',False)]}">
-                            <separator string="Acabados" colspan="2"/>
-                            <field name="acabados" colspan="2"/>
                             <group attrs="{'invisible':[('es_editorial','=',False)]}">
                                 <field name="tipo_encuadernado" style="width:33%"/>
                             </group>
+                            <separator string="Acabados" colspan="2"/>
+                            <field name="acabados" colspan="2"/>
                             
                             <separator string="Precios" colspan="2"/>
                             <field name="precios"/>
@@ -231,7 +239,7 @@
             <field name="name">Secuencia de las cotizaciones</field>
             <field name="code">secuencia.cotizacion</field>
             <field name="padding" eval="5"/>
-            <field name="prefix">C</field>
+            <field name="prefix">C-</field>
             <field name="implementation">no_gap</field>
         </record>
     </data>

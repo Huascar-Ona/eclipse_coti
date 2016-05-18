@@ -12,7 +12,7 @@ class papel(models.Model):
     def name_get(self, cr, uid, ids, context=None):
         names = []
         for rec in self.browse(cr, uid, ids):
-            name = rec.clasificacion + " " + rec.tipo
+            name = rec.clasificacion + " " + rec.tipo + " " + rec.gramaje
             names.append((rec.id, name))
         return names
 
