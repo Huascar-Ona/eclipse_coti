@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import models, fields, api
+from openerp import models, fields, api, exceptions
 from openerp.osv import osv
 from datetime import datetime
 
@@ -56,7 +56,7 @@ class cotizacion(models.Model):
     tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Pantone
-    pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas (solo Forros)
     n_paginas = fields.Integer(u"No. Páginas", readonly=True, states={'draft':[('readonly',False)]})
     
@@ -85,12 +85,9 @@ class cotizacion(models.Model):
     
     #Acabados
     #Ambos:
-    acabados = fields.Many2many("eclipse.cotizacion.acabado", "eclipse_acabados_coti_rel", string="Acabados", readonly=True, states={'draft':[('readonly',False)]})
+    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]})
     #Solo Editorial:
-    tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]})
-    
-    #Empaque
-    
+    tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]}, domain=[('acabado','=','Encuadernación')])
     
     #Precios y observaciones
     precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]})
@@ -167,7 +164,24 @@ class cotizacion(models.Model):
             if len(rec.validaciones) >= 2:
                 self.write(cr, uid, [rec.id], {'state': 'validated'})
         return True
+
+    @api.one
+    @api.constrains("largo_ext", "ancho_ext", "largo_final", "ancho_final",
+        "largo_ext_int", "ancho_ext_int", "largo_final_int", "ancho_final_int")
+    def _check_medidas(self):
+        medida_ext = self.largo_ext * self.ancho_ext
+        medida_final = self.largo_final * self.ancho_final
+        medida_ext_int = self.largo_ext_int * self.ancho_ext_int
+        medida_final_int = self.largo_final_int * self.ancho_final_int
+        if medida_final > medida_ext or medida_final_int > medida_ext_int :
+            raise exceptions.ValidationError("La medida final no puede ser mayor a la medida extendida")
     
+    @api.one
+    @api.constrains("n_paginas", "n_paginas_int")
+    def _check_zeros(self):
+        if self.es_editorial:
+            if self.n_paginas <= 0 or self.n_paginas_int <= 0:
+                raise exceptions.ValidationError("El número de páginas no puede ser cero")
 
 class cotizacion_validacion(osv.Model):
     _name = "eclipse.cotizacion.validacion"

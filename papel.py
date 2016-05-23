@@ -12,7 +12,7 @@ class papel(models.Model):
     def name_get(self, cr, uid, ids, context=None):
         names = []
         for rec in self.browse(cr, uid, ids):
-            name = rec.clasificacion + " " + rec.tipo + " " + rec.gramaje
+            name = rec.clasificacion + " " + rec.tipo + " " + str(rec.gramaje)
             names.append((rec.id, name))
         return names
 
@@ -26,6 +26,7 @@ class papel(models.Model):
         ids = self.search(cr, user, [('clasificacion', 'ilike', name)] + args, limit=limit, context=context)
         ids2 = self.search(cr, user, [('tipo', 'ilike', name)] + args, limit=limit, context=context)
         ids += ids2
+        ids = list(set(ids))
 
         recs = self.name_get(cr, user, ids, context)
         return sorted(recs, key=lambda (id, name): ids.index(id))

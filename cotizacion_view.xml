@@ -99,7 +99,7 @@
                                 <label string="Tipo de papel"/>
                                 <div>
                                     <field name="papel_int"
-                                        attrs="{'required': [('papel_otro_int','=',False)]}"/>
+                                        attrs="{'required': [('es_editorial','=',True),('papel_otro_int','=',False)]}"/>
                                     <label string="Otro" class="oe_inline"/>
                                     <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"/>
                                 </div>
@@ -147,7 +147,11 @@
                                 <field name="tipo_encuadernado" style="width:33%"/>
                             </group>
                             <separator string="Acabados" colspan="2"/>
-                            <field name="acabados" colspan="2"/>
+                            <field name="acabados" colspan="2">
+                                <tree string="Acabados">
+                                    <field name="acabado_id"/>
+                                </tree>
+                            </field>
                             
                             <separator string="Precios" colspan="2"/>
                             <field name="precios"/>
@@ -210,7 +214,7 @@
             <field name="res_model">eclipse.cotizacion</field>
             <field name="view_mode">list,form</field>
             <field name="view_type">tree</field>
-            <field name="domain">[('state','=','draft')]</field>
+            <field name="domain">[('state','!=','validated')]</field>
         </record>
 
         <menuitem action="act_open_cotizacion_1" id="menu_open_cotizacion_1"
