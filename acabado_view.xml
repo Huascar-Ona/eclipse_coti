@@ -105,8 +105,8 @@
                                 <field name="dominio_seleccion" invisible="1"/>
                                 <field name="numero" attrs="{'readonly':[('tipo_dato','!=','numero')],
                                     'required':[('tipo_dato','=','numero')]}"/>
-                                <field name="cadena" attrs="{'readonly':[('tipo_dato','!=','cadena')],
-                                    'required': [('tipo_dato','=','cadena')]}"/>
+                                <field name="cadena" attrs="{'readonly':[('tipo_dato','!=','texto')],
+                                    'required': [('tipo_dato','=','texto')]}"/>
                                 <field name="seleccion" attrs="{'readonly':[('tipo_dato','!=','seleccion')],
                                     'required': [('tipo_dato','=','seleccion')]}"
                                     domain="[('id', 'in', dominio_seleccion[0][2])]"

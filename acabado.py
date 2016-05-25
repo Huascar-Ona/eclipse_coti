@@ -52,6 +52,29 @@ class instancia_acabado(models.Model):
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     datos = fields.One2many("eclipse.cotizacion.acabado.dato.inst", "acabado_inst_id")
     show_datos = fields.Boolean("Pedir datos", default=False)
+    display_datos = fields.Text("Datos", compute="_get_display_datos")
+    
+    @api.depends("datos")
+    def _get_display_datos(self):
+        for rec in self:
+            display = []
+            for dato in rec.datos:
+                if dato.tipo_dato == 'numero':
+                    display.append("%s: %s"%(dato.acabado_dato_id.name, dato.numero))
+                elif dato.tipo_dato == 'texto':
+                    display.append("%s: %s"%(dato.acabado_dato_id.name, dato.cadena))
+                if dato.tipo_dato == 'seleccion':
+                    display.append("%s: %s"%(dato.acabado_dato_id.name, dato.seleccion.name))
+            rec.display_datos = '\n'.join(display)
+
+    @api.one
+    @api.constrains("datos")
+    def _check_datos(self):
+        for dato in self.datos:
+            if dato.tipo_dato == 'numero' and not dato.numero or \
+               dato.tipo_dato == 'texto' and not dato.cadena or \
+               dato.tipo_dato == 'selecion' and not dato.seleccion:
+                raise ValidationError("No se han ingresado valores para todos los datos solicitados")
 
     def onchange_acabado_id(self, cr, uid, ids, acabado_id):
         if acabado_id:

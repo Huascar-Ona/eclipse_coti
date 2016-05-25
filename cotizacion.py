@@ -29,7 +29,7 @@ class cotizacion(models.Model):
 
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
-    fecha = fields.Datetime("Fecha", readonly=True, states={'draft':[('readonly',False)]}, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    fecha = fields.Datetime("Fecha", readonly=True, states={'draft':[('readonly',False)]}, default=lambda x:datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
     agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
@@ -183,6 +183,12 @@ class cotizacion(models.Model):
             if self.n_paginas <= 0 or self.n_paginas_int <= 0:
                 raise exceptions.ValidationError("El número de páginas no puede ser cero")
 
+    def unlink(self, cr, uid, ids, context=None):
+        for rec in self.browse(cr, uid, ids):
+            if rec.state != 'draft':
+                raise osv.except_osv(u"Acción no permitida", u"No se pueden borrar cotizaciones a menos que estén en estado borrador")
+        return super(cotizacion, self).unlink(cr, uid, ids, context=context)
+
 class cotizacion_validacion(osv.Model):
     _name = "eclipse.cotizacion.validacion"
     
@@ -193,7 +199,7 @@ class cotizacion_precio(models.Model):
     _name = "eclipse.cotizacion.precio"
 
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
-    cantidad = fields.Float("Cantidad")
+    cantidad = fields.Float("Cantidad", digits=(14,0))
     precio_unitario = fields.Float("Precio Unitario")
     observacion = fields.Text(u"Observación")
 

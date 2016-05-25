@@ -150,6 +150,7 @@
                             <field name="acabados" colspan="2">
                                 <tree string="Acabados">
                                     <field name="acabado_id"/>
+                                    <field name="display_datos"/>
                                 </tree>
                             </field>
                             
