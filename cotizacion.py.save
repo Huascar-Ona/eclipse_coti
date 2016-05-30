@@ -29,7 +29,7 @@ class cotizacion(models.Model):
 
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
-    fecha = fields.Datetime("Fecha", readonly=True, states={'draft':[('readonly',False)]}, default=lambda x:datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    fecha = fields.Datetime("Fecha", readonly=True, states={'draft':[('readonly',False)]}, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
     agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
@@ -38,8 +38,6 @@ class cotizacion(models.Model):
     
     #Opciones
     diseno = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Diseño", readonly=True, states={'draft':[('readonly',False)]})
-    flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string="Flete", readonly=True, states={'draft':[('readonly',False)]})
-    costo_flete = fields.Float("Costo flete", readonly=True, states={'draft':[('readonly',False)]})
     opcion1 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string="Proceso", domain=[('name', 'in', list(OPCIONES_1.keys()))], readonly=True, states={'draft':[('readonly',False)]})
     opcion2 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Tipo", readonly=True, states={'draft':[('readonly',False)]})
     opcion3 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Subtipo", readonly=True, states={'draft':[('readonly',False)]})
@@ -49,11 +47,11 @@ class cotizacion(models.Model):
     
     #Para Produto y para Editorial - Forros:
     #Medida extendida en cm
-    largo_ext = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
-    ancho_ext = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    largo_ext = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    ancho_ext = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Medida final en cm
-    largo_final = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
-    ancho_final = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    largo_final = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    ancho_final = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
     tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
@@ -64,11 +62,11 @@ class cotizacion(models.Model):
     
     #Para Editorial - Interiores:
     #Medida extendida en cm
-    largo_ext_int = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]})
-    ancho_ext_int = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]})
+    largo_ext_int = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]})
+    ancho_ext_int = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]})
     #Medida final en cm
-    largo_final_int = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]})
-    ancho_final_int = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]})
+    largo_final_int = fields.Integer("Largo", readonly=True, states={'draft':[('readonly',False)]})
+    ancho_final_int = fields.Integer("Ancho", readonly=True, states={'draft':[('readonly',False)]})
     #Tintas a X b
     tintas_a_int = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     tintas_b_int = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
@@ -87,9 +85,12 @@ class cotizacion(models.Model):
     
     #Acabados
     #Ambos:
-    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]})
+    acabados = fields.Many2many("eclipse.cotizacion.acabado", "eclipse_acabados_coti_rel", string="Acabados", readonly=True, states={'draft':[('readonly',False)]})
     #Solo Editorial:
-    tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]}, domain=[('acabado','=','Encuadernación')])
+    tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]})
+    
+    #Empaque
+    
     
     #Precios y observaciones
     precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]})
@@ -178,18 +179,12 @@ class cotizacion(models.Model):
         if medida_final > medida_ext or medida_final_int > medida_ext_int :
             raise exceptions.ValidationError("La medida final no puede ser mayor a la medida extendida")
     
-    @api.one
+    @api.onem
     @api.constrains("n_paginas", "n_paginas_int")
     def _check_zeros(self):
         if self.es_editorial:
             if self.n_paginas <= 0 or self.n_paginas_int <= 0:
                 raise exceptions.ValidationError("El número de páginas no puede ser cero")
-
-    def unlink(self, cr, uid, ids, context=None):
-        for rec in self.browse(cr, uid, ids):
-            if rec.state != 'draft':
-                raise osv.except_osv(u"Acción no permitida", u"No se pueden borrar cotizaciones a menos que estén en estado borrador")
-        return super(cotizacion, self).unlink(cr, uid, ids, context=context)
 
 class cotizacion_validacion(osv.Model):
     _name = "eclipse.cotizacion.validacion"
@@ -201,7 +196,7 @@ class cotizacion_precio(models.Model):
     _name = "eclipse.cotizacion.precio"
 
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
-    cantidad = fields.Float("Cantidad", digits=(14,0))
+    cantidad = fields.Float("Cantidad")
     precio_unitario = fields.Float("Precio Unitario")
     observacion = fields.Text(u"Observación")
 

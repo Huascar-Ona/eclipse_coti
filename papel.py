@@ -9,6 +9,8 @@ class papel(models.Model):
     tipo = fields.Char("Tipo", required=True)
     gramaje = fields.Integer("Gramaje", required=True)
 
+    _sql_constraints = [('unique', 'unique(clasificacion, tipo, gramaje)', 'Registro repetido')]
+
     def name_get(self, cr, uid, ids, context=None):
         names = []
         for rec in self.browse(cr, uid, ids):

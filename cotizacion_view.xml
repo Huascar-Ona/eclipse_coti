@@ -47,6 +47,9 @@
                         </group>
                         <group string="Opciones del proceso" style="width:33%%">
                             <field name="diseno"/>
+                            <field name="flete"/>
+                            <field name="costo_flete" attrs="{'invisible': [('flete','!=','s')],
+                                'required': [('flete','=','s')]}"/>
                             <field name="opcion1" on_change="onchange_opcion1(opcion1)"
                                 options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
                             <field name="opcion2" on_change="onchange_opcion2(opcion2)" 

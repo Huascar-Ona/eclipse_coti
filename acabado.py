@@ -9,6 +9,8 @@ class acabado(models.Model):
     tipo = fields.Char(u"Tipo", required=True)
     datos = fields.Many2many("eclipse.cotizacion.acabado.dato", "eclipse_cotizacion_acabado_datos_rel", "id1", "id2", string="Datos")
 
+    _sql_constraints = [('unique', 'unique(acabado, tipo)', 'Registro repetido')]
+
     def name_get(self, cr, uid, ids, context=None):
         names = []
         for rec in self.browse(cr, uid, ids):
@@ -67,15 +69,6 @@ class instancia_acabado(models.Model):
                     display.append("%s: %s"%(dato.acabado_dato_id.name, dato.seleccion.name))
             rec.display_datos = '\n'.join(display)
 
-    @api.one
-    @api.constrains("datos")
-    def _check_datos(self):
-        for dato in self.datos:
-            if dato.tipo_dato == 'numero' and not dato.numero or \
-               dato.tipo_dato == 'texto' and not dato.cadena or \
-               dato.tipo_dato == 'selecion' and not dato.seleccion:
-                raise ValidationError("No se han ingresado valores para todos los datos solicitados")
-
     def onchange_acabado_id(self, cr, uid, ids, acabado_id):
         if acabado_id:
             acabado = self.pool.get("eclipse.cotizacion.acabado").browse(cr, uid, acabado_id)
@@ -98,6 +91,3 @@ class instancia_acabado_dato(models.Model):
     numero = fields.Float(u"Número")
     cadena = fields.Char("Texto")
     seleccion = fields.Many2one("eclipse.cotizacion.acabado.dato.opcion", string=u"Selección")
-    
-    
-    
