@@ -16,6 +16,21 @@
             </field>
         </record>
 
+        <!-- Vista de arbol flete-->
+        <record id="cotizacion_flete_view_tree" model="ir.ui.view">
+            <field name="name">cotizacion.view.tree</field>
+            <field name="model">eclipse.cotizacion.flete</field>
+            <field name="arch" type="xml">
+                <tree string="Cotizaciones">
+                    <field name="name"/>
+                    <field name="fecha"/>
+                    <field name="empresa"/>
+                    <field name="costo_flete"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
         <!-- Formulario-->
         <record id="cotizacion_view_form" model="ir.ui.view">
             <field name="name">cotizacion.view.form</field>
@@ -31,11 +46,15 @@
                             states="validating" groups="eclipse_coti.grupo_cotizacion"/> 
                         <field name="state" widget="statusbar"/>
                     </header>
-                    <sheet>
+                    <sheet string="Cotización">
+                        <h1>
+                            <label string="Requisición" attrs="{'invisible':[('state','!=','draft')]}"/>
+                            <label string="Cotización" attrs="{'invisible':[('state','=','draft')]}"/>
+                            <field name="name" class="oe_inline" readonly="1"/>
+                        </h1>
                         <group string="Datos">
                             <group>
-                                <field name="name"/>
-                                <field name="fecha"/>
+                                <field name="fecha" readonly="1"/>
                                 <field name="tiempo_de_entrega"/>
                             </group>
                             <group>
@@ -52,7 +71,7 @@
                                 'required': [('flete','=','s')]}"/>
                             <field name="opcion1" on_change="onchange_opcion1(opcion1)"
                                 options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
-                            <field name="opcion2" on_change="onchange_opcion2(opcion2)" 
+                            <field name="opcion2" on_change="onchange_opcion2(opcion1, opcion2)" 
                                 domain="[('id','=',0)]"
                                 options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
                             <field name="opcion3" on_change="onchange_opcion3(opcion3)"
@@ -62,6 +81,8 @@
                             <field name="opcion_otro" attrs="{'invisible':[('show_otro','=',False)],
                                 'required': [('show_otro','=',True)]}"/>
                             <field name="es_editorial" invisible="1"/>
+                            <field name="es_digital" invisible="1"/>
+                            <field name="es_plotter" invisible="1"/>
                         </group>
                         <group attrs="{'invisible':[('opcion3','=',False)]}">
                             <group attrs="{'invisible':[('es_editorial','=',False)]}">
@@ -90,18 +111,21 @@
                                     <field name="tintas_b_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
                                 </div>
-                                <label string="Pantone"/>
-                                <div>
+                                <label string="Pantone" attrs="{'invisible':[('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="pantone_int"/>
                                 </div>
                                 <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
                                 <div attrs="{'invisible':[('es_editorial','=',False)]}">
-                                    <field name="n_paginas_int" class="oe_inline"/>
-                                    <field name="tipo_paginas_int" class="oe_inline"/>
+                                    <field name="n_paginas_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="tipo_paginas_int" class="oe_inline"
+                                        attrs="{'required': [('es_editorial','=',True)]}"/>
                                 </div>
                                 <label string="Tipo de papel"/>
                                 <div>
                                     <field name="papel_int"
+                                        options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
                                         attrs="{'required': [('es_editorial','=',True),('papel_otro_int','=',False)]}"/>
                                     <label string="Otro" class="oe_inline"/>
                                     <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"/>
@@ -125,20 +149,21 @@
                                 <label string="Tintas"/>
                                 <div>
                                     <field name="tintas_a" class="oe_inline"/>
-                                    <label string="x" class="oe_inline"/>
-                                    <field name="tintas_b" class="oe_inline"/>
+                                    <label string="x" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
+                                    <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
                                 </div>
-                                <label string="Pantone"/>
-                                <div>
+                                <label string="Pantone" attrs="{'invisible':[('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="pantone"/>
                                 </div>
                                 <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
                                 <div attrs="{'invisible':[('es_editorial','=',False)]}">
-                                    <field name="n_paginas"/>
+                                    <field name="n_paginas" attrs="{'required':[('es_editorial','=',True)]}"/>
                                 </div>
                                 <label string="Tipo de papel"/>
                                 <div>
                                     <field name="papel"
+                                        options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
                                         attrs="{'required': [('papel_otro','=',False)]}"/>
                                     <label string="Otro" class="oe_inline"/>
                                     <field name="papel_otro" class="oe_inline" placeholder="Especificar"/>
@@ -187,6 +212,7 @@
                             <field name="cantidad"/>
                             <field name="precio_unitario" readonly="1"/>
                             <field name="observacion" readonly="1"/>
+                            <field name="state" invisible="1"/>
                         </tree>
                     </field>
                 </field>
@@ -205,12 +231,48 @@
                             <field name="cantidad"/>
                             <field name="precio_unitario"/>
                             <field name="observacion"/>
+                            <field name="state" invisible="1"/>
                         </tree>
                     </field>
                 </field>
             </field>
             <field name="groups_id" eval="[(6,0,[ref('eclipse_coti.grupo_cotizacion')])]"/>
         </record>
+
+        <!-- Formulario flete-->
+        <record id="cotizacion_flete_view_form" model="ir.ui.view">
+            <field name="name">cotizacion.view.form</field>
+            <field name="model">eclipse.cotizacion.flete</field>
+            <field name="arch" type="xml">
+                <form string="Cotizaciones flete">
+                    <header>
+                        <field name="state" invisible="1"/>
+                    </header>
+                    <sheet string="Cotización">
+                        <h1>
+                            <label string="Cotización flete"/>
+                            <field name="name" class="oe_inline" readonly="1"/>
+                        </h1>
+                        <group string="Datos">
+                            <group>
+                                <field name="fecha" readonly="1"/>
+                                <field name="tiempo_de_entrega"/>
+                            </group>
+                            <group>
+                                <field name="agente"/>
+                                <field name="atencion_a"/>
+                                <field name="empresa"/>
+                                <field name="tel"/>
+                            </group>
+                        </group>
+                        <group string="Flete">
+                            <field name="costo_flete"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
         
         <!-- Acción y menú -->
         <record id="act_open_cotizacion_1" model="ir.actions.act_window">
@@ -237,7 +299,18 @@
             parent="eclipse_coti.menu_coti" sequence="20"
             groups="eclipse_coti.grupo_cotizacion"/>
 
-        <!-- Secuencia -->
+        <record id="act_open_cotizacion_flete" model="ir.actions.act_window">
+            <field name="name">Flete</field>
+            <field name="res_model">eclipse.cotizacion.flete</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_type">tree</field>
+        </record>
+
+        <menuitem action="act_open_cotizacion_flete" id="menu_open_cotizacion_flete"
+            parent="eclipse_coti.menu_coti" sequence="30"
+            groups="eclipse_coti.grupo_cotizacion,eclipse_coti.grupo_requisicion"/>
+
+        <!-- Secuencias -->
         <record id="codigo_secuencia_cotizacion" model="ir.sequence.type">
             <field name="name">Secuencia de las cotizaciones</field>
             <field name="code">secuencia.cotizacion</field>
@@ -248,6 +321,19 @@
             <field name="code">secuencia.cotizacion</field>
             <field name="padding" eval="5"/>
             <field name="prefix">C-</field>
+            <field name="implementation">no_gap</field>
+        </record>
+        
+        <record id="codigo_secuencia_cotizacion_flete" model="ir.sequence.type">
+            <field name="name">Secuencia de las cotizaciones flete</field>
+            <field name="code">secuencia.cotizacion.flete</field>
+        </record>
+
+        <record id="secuencia_cotizacion_flete" model="ir.sequence">
+            <field name="name">Secuencia de las cotizaciones flete</field>
+            <field name="code">secuencia.cotizacion.flete</field>
+            <field name="padding" eval="5"/>
+            <field name="prefix">CF-</field>
             <field name="implementation">no_gap</field>
         </record>
     </data>

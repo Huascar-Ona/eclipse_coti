@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import models, fields, api, exceptions
+from openerp.exceptions import ValidationError
 from openerp.osv import osv
 from datetime import datetime
 
@@ -13,6 +14,8 @@ OPCIONES_2 = {
     'Editorial': ['Catálogo', 'Block', 'Libro', 'Manual', 'Revista', 'Otro'],
     'Producto': ['Caja', 'Cuadríptico', 'Díptico', 'Etiqueta', 'Flyer', 'Folder', 'Otro']
 }
+
+OPCIONES_PLOTTER = ['Póster', 'Otro']
 
 class opcion(models.Model):
     _name = "eclipse.cotizacion.opcion"
@@ -29,7 +32,7 @@ class cotizacion(models.Model):
 
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
-    fecha = fields.Datetime("Fecha", readonly=True, states={'draft':[('readonly',False)]}, default=lambda x:datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    fecha = fields.Datetime("Fecha de solicitud", readonly=True, states={'draft':[('readonly',False)]})
     tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
     agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
@@ -46,6 +49,8 @@ class cotizacion(models.Model):
     show_otro = fields.Boolean("Mostrar Otro", default=False)
     opcion_otro = fields.Char("Especificar", readonly=True, states={'draft':[('readonly',False)]})
     es_editorial = fields.Boolean("Es Editorial", default=False)
+    es_digital = fields.Boolean("Es Digital", default=False)
+    es_plotter = fields.Boolean("Es Plotter", default=False)
     
     #Para Produto y para Editorial - Forros:
     #Medida extendida en cm
@@ -60,7 +65,7 @@ class cotizacion(models.Model):
     #Pantone
     pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas (solo Forros)
-    n_paginas = fields.Integer(u"No. Páginas", readonly=True, states={'draft':[('readonly',False)]})
+    n_paginas = fields.Integer(u"No. Páginas", required=True, readonly=True, states={'draft':[('readonly',False)]})
     
     #Para Editorial - Interiores:
     #Medida extendida en cm
@@ -100,29 +105,45 @@ class cotizacion(models.Model):
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
         ('validating', 'Esperando validación'), ('validated', 'Validada')], string="Estado", default="draft")
 
+    _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
+
+    def copy(self, cr, uid, id, default={}, context=None):
+        if default is None: default={}
+        default["name"] = "/"
+        return super(cotizacion, self).copy(cr, uid, id, default=default, context=context)
+
     def create(self, cr, uid, vals, context=None):
-        if vals["name"] == "/":
+        if vals.get("name", "/") == "/":
             vals["name"] = self.pool.get('ir.sequence').get(cr, uid, 'secuencia.cotizacion')
         return super(cotizacion, self).create(cr, uid, vals, context=context)
 
-  
     def onchange_opcion1(self, cr, uid, ids, opcion1, context=None):
         if opcion1:
             #Abir tipos de acuerdo al proceso seleccionado
             opcion1 = self.pool.get("eclipse.cotizacion.opcion").browse(cr, uid, opcion1).name
             opciones = OPCIONES_1[opcion1]
             opcion2_ids = self.pool.get("eclipse.cotizacion.opcion").search(cr, uid, [('name', 'in', opciones)])
-            print "******", opcion2_ids
-            return {
-                'domain': {'opcion2': [('id', 'in', opcion2_ids)]}
+            es_digital = opcion1 == 'Digital'
+            es_plotter = opcion1 == 'Plotter'
+            res = {
+                'domain': {'opcion2': [('id', 'in', opcion2_ids)]},
+                'value': {'es_digital': es_digital, 'es_plotter': es_plotter}
             }
+            if es_plotter:
+                res["value"]["tintas_a"] = '4'
+            return res
         return {}
 
-    def onchange_opcion2(self, cr, uid, ids, opcion2, context=None):
+    def onchange_opcion2(self, cr, uid, ids, opcion1, opcion2, context=None):
         if opcion2:
-            #Abir subtipos de acuerdo al tipo seleccionado
-            opcion2 = self.pool.get("eclipse.cotizacion.opcion").browse(cr, uid, opcion2).name
-            opciones = OPCIONES_2[opcion2]
+            opcion_obj = self.pool.get("eclipse.cotizacion.opcion")
+            opcion1 = opcion_obj.browse(cr, uid, opcion1).name
+            opcion2 = opcion_obj.browse(cr, uid, opcion2).name
+            #Abir subtipos de acuerdo al tipo seleccionado. Si es plotter usar las opciones de plotter
+            if opcion1 == 'Plotter':
+                opciones = OPCIONES_PLOTTER
+            else:
+                opciones = OPCIONES_2[opcion2]
             opcion3_ids = self.pool.get("eclipse.cotizacion.opcion").search(cr, uid, [('name', 'in', opciones)])
             es_editorial = opcion2 == 'Editorial'
             return {
@@ -141,9 +162,11 @@ class cotizacion(models.Model):
             }
         return {}
         
-    
     def action_solicitar_cotizacion(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state': 'submitted'})
+        for rec in self.browse(cr, uid, ids):
+            if len(rec.precios) == 0:
+                raise osv.except_osv(u"No se puede solicitar cotización", u"No se ha ingresado ninguna cantidad a solicitar")
+            self.write(cr, uid, ids, {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
         return True
 
     def action_solicitar_validacion(self, cr, uid, ids, context=None):
@@ -171,6 +194,11 @@ class cotizacion(models.Model):
     @api.constrains("largo_ext", "ancho_ext", "largo_final", "ancho_final",
         "largo_ext_int", "ancho_ext_int", "largo_final_int", "ancho_final_int")
     def _check_medidas(self):
+        if self.largo_ext <= 0 or self.ancho_ext <= 0 or self.largo_final <= 0 or self.ancho_final <= 0:
+            raise exceptions.ValidationError("Todas las medidas deben ser mayores a cero")
+        if self.es_editorial:
+            if self.largo_ext_int <= 0 or self.ancho_ext_int <= 0 or self.largo_final_int <= 0 or self.ancho_final_int <= 0:
+                raise exceptions.ValidationError("Todas las medidas deben ser mayores a cero")
         medida_ext = self.largo_ext * self.ancho_ext
         medida_final = self.largo_final * self.ancho_final
         medida_ext_int = self.largo_ext_int * self.ancho_ext_int
@@ -179,11 +207,17 @@ class cotizacion(models.Model):
             raise exceptions.ValidationError("La medida final no puede ser mayor a la medida extendida")
     
     @api.one
+    @api.constrains("costo_flete")
+    def _check_flete(self):
+        if self.flete == 's' and self.costo_flete <= 0:
+            raise exceptions.ValidationError("El costo del flete debe ser mayor a cero")
+    
+    @api.one
     @api.constrains("n_paginas", "n_paginas_int")
     def _check_zeros(self):
         if self.es_editorial:
             if self.n_paginas <= 0 or self.n_paginas_int <= 0:
-                raise exceptions.ValidationError("El número de páginas no puede ser cero")
+                raise exceptions.ValidationError("El número de páginas debe ser mayor a cero")
 
     def unlink(self, cr, uid, ids, context=None):
         for rec in self.browse(cr, uid, ids):
@@ -201,7 +235,46 @@ class cotizacion_precio(models.Model):
     _name = "eclipse.cotizacion.precio"
 
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
-    cantidad = fields.Float("Cantidad", digits=(14,0))
-    precio_unitario = fields.Float("Precio Unitario")
+    cantidad = fields.Float("Cantidad", digits=(14,0), readonly=True, states={'draft':[('readonly',False)]})
+    precio_unitario = fields.Float("Precio Unitario", readonly=True, states={'submitted':[('readonly',False)]})
     observacion = fields.Text(u"Observación")
+    state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
+        ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado")
+    
+    @api.one
+    @api.constrains("cantidad")
+    def check_qty(self):
+        if self.cantidad <= 0:
+            raise ValidationError("La cantidad debe ser mayor a cero")
 
+
+class cotizacion_flete(models.Model):
+    _name = "eclipse.cotizacion.flete"
+
+    name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
+    fecha = fields.Datetime("Fecha de solicitud", readonly=True, states={'draft':[('readonly',False)]})
+    tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
+    agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
+    empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
+    costo_flete = fields.Float("Costo Flete", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    state = fields.Selection([('draft','Borrador')], string="Estado", default="draft")
+
+    _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
+
+    def copy(self, cr, uid, id, default={}, context=None):
+        if default is None: default={}
+        default["name"] = "/"
+        return super(cotizacion_flete, self).copy(cr, uid, id, default=default, context=context)
+
+    def create(self, cr, uid, vals, context=None):
+        if vals.get("name", "/") == "/":
+            vals["name"] = self.pool.get('ir.sequence').get(cr, uid, 'secuencia.cotizacion.flete')
+        return super(cotizacion_flete, self).create(cr, uid, vals, context=context)
+
+    @api.one
+    @api.constrains("costo_flete")
+    def _check_flete(self):
+        if self.costo_flete <= 0:
+            raise exceptions.ValidationError("El costo del flete debe ser mayor a cero")
