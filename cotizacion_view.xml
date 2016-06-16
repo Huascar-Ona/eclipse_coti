@@ -152,8 +152,8 @@
                                     <label string="x" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
                                     <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)],'required': [('es_plotter','=',False)]}"/>
                                 </div>
-                                <label string="Pantone" attrs="{'invisible':[('es_digital','=',True)]}"/>
-                                <div attrs="{'invisible':[('es_digital','=',True)]}">
+                                <label string="Pantone" attrs="{'invisible':['|',('es_plotter','=',True),('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':['|',('es_plotter','=',True),('es_digital','=',True)]}">
                                     <field name="pantone"/>
                                 </div>
                                 <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
