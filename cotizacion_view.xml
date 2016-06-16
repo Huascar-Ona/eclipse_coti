@@ -150,7 +150,7 @@
                                 <div>
                                     <field name="tintas_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
-                                    <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
+                                    <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)],'required': [('es_plotter','=',False)]}"/>
                                 </div>
                                 <label string="Pantone" attrs="{'invisible':[('es_digital','=',True)]}"/>
                                 <div attrs="{'invisible':[('es_digital','=',True)]}">
@@ -246,7 +246,8 @@
             <field name="arch" type="xml">
                 <form string="Cotizaciones flete">
                     <header>
-                        <field name="state" invisible="1"/>
+                        <button name="action_solicitar_cotizacion" string="Solicitar cotización" type="object" states="draft"/>
+                        <field name="state" widget="statusbar"/>
                     </header>
                     <sheet string="Cotización">
                         <h1>
@@ -266,7 +267,9 @@
                             </group>
                         </group>
                         <group string="Flete">
-                            <field name="costo_flete"/>
+                            <field name="descripcion"/>
+                            <field name="costo_flete" groups="eclipse_coti.grupo_cotizacion"
+                                attrs="{'invisible':[('state','=','draft')]}"/>
                         </group>
                     </sheet>
                 </form>

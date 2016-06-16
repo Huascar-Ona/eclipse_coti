@@ -61,7 +61,7 @@ class cotizacion(models.Model):
     ancho_final = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
     tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
-    tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
     pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas (solo Forros)
@@ -164,8 +164,10 @@ class cotizacion(models.Model):
         
     def action_solicitar_cotizacion(self, cr, uid, ids, context=None):
         for rec in self.browse(cr, uid, ids):
+            if len(rec.acabados) < 1:
+                raise osv.except_osv(u"No se puede solicitar cotización", u"Debe haber por lo menos un acabado.")                
             if len(rec.precios) == 0:
-                raise osv.except_osv(u"No se puede solicitar cotización", u"No se ha ingresado ninguna cantidad a solicitar")
+                raise osv.except_osv(u"No se puede solicitar cotización", u"No se ha ingresado ninguna cantidad a solicitar.")
             self.write(cr, uid, ids, {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
         return True
 
@@ -211,6 +213,12 @@ class cotizacion(models.Model):
     def _check_flete(self):
         if self.flete == 's' and self.costo_flete <= 0:
             raise exceptions.ValidationError("El costo del flete debe ser mayor a cero")
+
+    @api.one
+    @api.constrains("tiempo_de_entrega")
+    def _check_tiempo_entrega(self):
+        if self.tiempo_de_entrega < self.fecha:
+            raise exceptions.ValidationError("La fecha de entrega debe ser posterior a la fecha de solicitud.")
     
     @api.one
     @api.constrains("n_paginas", "n_paginas_int")
@@ -239,7 +247,7 @@ class cotizacion_precio(models.Model):
     precio_unitario = fields.Float("Precio Unitario", readonly=True, states={'submitted':[('readonly',False)]})
     observacion = fields.Text(u"Observación")
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
-        ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado")
+        ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado", default="draft")
     
     @api.one
     @api.constrains("cantidad")
@@ -259,7 +267,8 @@ class cotizacion_flete(models.Model):
     empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
     costo_flete = fields.Float("Costo Flete", readonly=True, states={'draft':[('readonly',False)]}, required=True)
-    state = fields.Selection([('draft','Borrador')], string="Estado", default="draft")
+    descripcion = fields.Text("Descripción")
+    state = fields.Selection([('draft','Borrador'),('submitted','Solicitada')], string="Estado", default="draft")
 
     _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
 
@@ -276,5 +285,18 @@ class cotizacion_flete(models.Model):
     @api.one
     @api.constrains("costo_flete")
     def _check_flete(self):
-        if self.costo_flete <= 0:
+        if self.costo_flete <= 0 and self.state == 'submitted':
             raise exceptions.ValidationError("El costo del flete debe ser mayor a cero")
+
+    def action_solicitar_cotizacion(self, cr, uid, ids, context=None):
+        for rec in self.browse(cr, uid, ids):
+            if not rec.descripcion:
+                raise osv.except_osv(u"No se puede solicitar cotización", u"No se ha ingresado descrípción")
+            self.write(cr, uid, ids, {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+        return True
+
+    @api.one
+    @api.constrains("tiempo_de_entrega")
+    def _check_tiempo_entrega(self):
+        if self.tiempo_de_entrega < self.fecha:
+            raise exceptions.ValidationError("La fecha de entrega debe ser posterior a la fecha de solicitud.")
