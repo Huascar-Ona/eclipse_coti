@@ -52,7 +52,7 @@ class instancia_acabado(models.Model):
 
     acabado_id = fields.Many2one("eclipse.cotizacion.acabado", string="Nombre", required=True)
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
-    datos = fields.One2many("eclipse.cotizacion.acabado.dato.inst", "acabado_inst_id")
+    datos = fields.One2many("eclipse.cotizacion.acabado.dato.inst", "acabado_inst_id", copy=True)
     show_datos = fields.Boolean("Pedir datos", default=False)
     display_datos = fields.Text("Datos", compute="_get_display_datos")
     

@@ -33,7 +33,7 @@ class cotizacion(models.Model):
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
     fecha = fields.Datetime("Fecha de solicitud", readonly=True, states={'draft':[('readonly',False)]})
-    tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
+    tiempo_de_entrega = fields.Datetime("Fecha de entrega", readonly=True, states={'draft':[('readonly',False)]})
     agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
     empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]}, required=True)
@@ -41,8 +41,10 @@ class cotizacion(models.Model):
     
     #Opciones
     diseno = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Diseño", readonly=True, states={'draft':[('readonly',False)]})
-    flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string="Flete", readonly=True, states={'draft':[('readonly',False)]})
+    flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Flete Foráneo", readonly=True, states={'draft':[('readonly',False)]})
+    tienes_costo = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"¿Tienes el costo?")
     costo_flete = fields.Float("Costo flete", readonly=True, states={'draft':[('readonly',False)]})
+    codigos_postales = fields.One2many("eclipse.cotizacion.cp", "cotizacion_id", string=u"Códigos Potales")
     opcion1 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string="Proceso", domain=[('name', 'in', list(OPCIONES_1.keys()))], readonly=True, states={'draft':[('readonly',False)]})
     opcion2 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Tipo", readonly=True, states={'draft':[('readonly',False)]})
     opcion3 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Subtipo", readonly=True, states={'draft':[('readonly',False)]})
@@ -92,12 +94,12 @@ class cotizacion(models.Model):
     
     #Acabados
     #Ambos:
-    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]})
+    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]}, copy=True)
     #Solo Editorial:
     tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]}, domain=[('acabado','=','Encuadernación')])
     
     #Precios y observaciones
-    precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]})
+    precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]}, copy=True)
     observaciones = fields.Text("Observaciones")
     
     #Variables de control
@@ -215,7 +217,7 @@ class cotizacion(models.Model):
             raise exceptions.ValidationError("El costo del flete debe ser mayor a cero")
 
     @api.one
-    @api.constrains("tiempo_de_entrega")
+    @api.constrains("tiempo_de_entrega", "fecha")
     def _check_tiempo_entrega(self):
         if self.tiempo_de_entrega < self.fecha:
             raise exceptions.ValidationError("La fecha de entrega debe ser posterior a la fecha de solicitud.")
@@ -261,13 +263,13 @@ class cotizacion_flete(models.Model):
 
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
     fecha = fields.Datetime("Fecha de solicitud", readonly=True, states={'draft':[('readonly',False)]})
-    tiempo_de_entrega = fields.Datetime("Tiempo de entrega", readonly=True, states={'draft':[('readonly',False)]})
+    tiempo_de_entrega = fields.Datetime("Fecha de entrega", readonly=True, states={'draft':[('readonly',False)]})
     agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
     empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
-    costo_flete = fields.Float("Costo Flete", readonly=True, states={'draft':[('readonly',False)]}, required=True)
-    descripcion = fields.Text("Descripción")
+    costo_flete = fields.Float("Costo Flete", readonly=True, states={'submitted':[('readonly',False)]})
+    descripcion = fields.Text(u"Descripción",  readonly=True, states={'draft':[('readonly',False)]})
     state = fields.Selection([('draft','Borrador'),('submitted','Solicitada')], string="Estado", default="draft")
 
     _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
@@ -296,7 +298,13 @@ class cotizacion_flete(models.Model):
         return True
 
     @api.one
-    @api.constrains("tiempo_de_entrega")
+    @api.constrains("tiempo_de_entrega", "fecha")
     def _check_tiempo_entrega(self):
         if self.tiempo_de_entrega < self.fecha:
             raise exceptions.ValidationError("La fecha de entrega debe ser posterior a la fecha de solicitud.")
+
+class codigo_postal(models.Model):
+    _name = "eclipse.cotizacion.cp"
+    
+    name = fields.Char(u"Código postal")
+    cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")

@@ -64,25 +64,37 @@
                                 <field name="tel"/>
                             </group>
                         </group>
-                        <group string="Opciones del proceso" style="width:33%%">
-                            <field name="diseno"/>
-                            <field name="flete"/>
-                            <field name="costo_flete" attrs="{'invisible': [('flete','!=','s')],
-                                'required': [('flete','=','s')]}"/>
-                            <field name="opcion1" on_change="onchange_opcion1(opcion1)"
-                                options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
-                            <field name="opcion2" on_change="onchange_opcion2(opcion1, opcion2)" 
-                                domain="[('id','=',0)]"
-                                options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
-                            <field name="opcion3" on_change="onchange_opcion3(opcion3)"
-                                domain="[('id','=',0)]"
-                                options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
-                            <field name="show_otro" invisible="1"/>
-                            <field name="opcion_otro" attrs="{'invisible':[('show_otro','=',False)],
-                                'required': [('show_otro','=',True)]}"/>
-                            <field name="es_editorial" invisible="1"/>
-                            <field name="es_digital" invisible="1"/>
-                            <field name="es_plotter" invisible="1"/>
+                        <group>
+                            <group string="Opciones del proceso">
+                                <field name="diseno"/>
+                                <field name="opcion1" on_change="onchange_opcion1(opcion1)"
+                                    options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
+                                <field name="opcion2" on_change="onchange_opcion2(opcion1, opcion2)" 
+                                    domain="[('id','=',0)]"
+                                    options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
+                                <field name="opcion3" on_change="onchange_opcion3(opcion3)"
+                                    domain="[('id','=',0)]"
+                                    options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
+                                <field name="show_otro" invisible="1"/>
+                                <field name="opcion_otro" attrs="{'invisible':[('show_otro','=',False)],
+                                    'required': [('show_otro','=',True)]}"/>
+                                <field name="es_editorial" invisible="1"/>
+                                <field name="es_digital" invisible="1"/>
+                                <field name="es_plotter" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="flete"/>
+                                <field name="tienes_costo" attrs="{'invisible': [('flete','!=','s')],
+                                    'required': [('flete','=','s')]}"/>
+                                <field name="costo_flete" attrs="{'invisible': [('tienes_costo','!=','s')],
+                                    'required': [('tienes_costo','=','s')]}"/>
+                                <field name="codigos_postales" attrs="{'invisible': [('tienes_costo','!=','n')],
+                                    'required': [('tienes_costo','=','n')]}">
+                                        <tree string="C.P." editable="bottom">
+                                            <field name="name"/>
+                                        </tree>
+                                </field>
+                            </group>
                         </group>
                         <group attrs="{'invisible':[('opcion3','=',False)]}">
                             <group attrs="{'invisible':[('es_editorial','=',False)]}">
@@ -209,7 +221,7 @@
                 <field name="precios" position="replace">
                     <field name="precios" colspan="2">
                         <tree string="Precios" editable="bottom">
-                            <field name="cantidad"/>
+                            <field name="cantidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
                             <field name="precio_unitario" readonly="1"/>
                             <field name="observacion" readonly="1"/>
                             <field name="state" invisible="1"/>
@@ -228,8 +240,8 @@
                 <field name="precios" position="replace">
                     <field name="precios" colspan="2">
                         <tree string="Precios" editable="bottom">
-                            <field name="cantidad"/>
-                            <field name="precio_unitario"/>
+                            <field name="cantidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
+                            <field name="precio_unitario" attrs="{'readonly': [('state','in',('draft','validating','validated'))]}"/>
                             <field name="observacion"/>
                             <field name="state" invisible="1"/>
                         </tree>
@@ -269,7 +281,7 @@
                         <group string="Flete">
                             <field name="descripcion"/>
                             <field name="costo_flete" groups="eclipse_coti.grupo_cotizacion"
-                                attrs="{'invisible':[('state','=','draft')]}"/>
+                                attrs="{'invisible':[('state','=','draft')], 'required': [('state','=','submitted')]}"/>
                         </group>
                     </sheet>
                 </form>
