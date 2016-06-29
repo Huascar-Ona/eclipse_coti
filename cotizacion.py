@@ -64,6 +64,11 @@ class cotizacion(models.Model):
     #Tintas a X b
     tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    #Barnices
+    barniz_mate_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
+    barniz_mate_b = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
+    barniz_brillante_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
+    barniz_brillante_b = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
     pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas (solo Forros)
@@ -166,6 +171,8 @@ class cotizacion(models.Model):
         
     def action_solicitar_cotizacion(self, cr, uid, ids, context=None):
         for rec in self.browse(cr, uid, ids):
+            if rec.flete == 's' and rec.tienes_costo == 'n' and len(rec.codigos_postales) == 0:
+                raise osv.except_osv(u"No se puede solicitar cotización", u"No has ingresado por lo menos un código postal")
             if len(rec.acabados) < 1:
                 raise osv.except_osv(u"No se puede solicitar cotización", u"Debe haber por lo menos un acabado.")                
             if len(rec.precios) == 0:
@@ -209,6 +216,16 @@ class cotizacion(models.Model):
         medida_final_int = self.largo_final_int * self.ancho_final_int
         if medida_final > medida_ext or medida_final_int > medida_ext_int :
             raise exceptions.ValidationError("La medida final no puede ser mayor a la medida extendida")
+
+    @api.one
+    @api.constrains("barniz_mate_a", "barniz_mate_b", "barniz_brillante_a", "barniz_brillante_b")
+    def _check_barnices(self):
+        if self.barniz_mate_a or self.barniz_mate_b:
+            if self.barniz_mate_a == '0' and self.barniz_mate_b == '0':
+                raise exceptions.ValidationError("Los barnices solo pueden ser 1x0, 1x1 ó 0x1")
+        if self.barniz_brillante_a or self.barniz_brillante_b:
+            if self.barniz_brillante_a == '0' and self.barniz_brillante_b == '0':
+                raise exceptions.ValidationError("Los barnices solo pueden ser 1x0, 1x1 ó 0x1")
     
     @api.one
     @api.constrains("costo_flete")
@@ -306,5 +323,12 @@ class cotizacion_flete(models.Model):
 class codigo_postal(models.Model):
     _name = "eclipse.cotizacion.cp"
     
-    name = fields.Char(u"Código postal")
+    name = fields.Char(u"Código postal", size=5)
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
+
+    @api.one
+    @api.constrains("name")
+    def _check_name(self):
+        for ch in self.name:
+            if not ch.isdigit():
+                raise exceptions.ValidationError("Solo ingresar números en el código postal")

@@ -7,8 +7,8 @@
             <field name="model">eclipse.cotizacion.papel</field>
             <field name="arch" type="xml">
                 <tree string="Papel" editable="top">
-                    <field name="clasificacion"/>
                     <field name="tipo"/>
+                    <field name="clasificacion"/>
                     <field name="gramaje"/>
                 </tree>
             </field>
