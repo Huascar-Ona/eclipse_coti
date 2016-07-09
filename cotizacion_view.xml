@@ -226,7 +226,7 @@
         </record>
         
         <record id="cotizacion_view_form_draft" model="ir.ui.view">
-            <field name="name">cotizacion.view.form.draft (no editar precios)</field>
+            <field name="name">cotizacion.view.form.draft (no editar precios ni verlos antes de ser validados)</field>
             <field name="model">eclipse.cotizacion</field>
             <field name="inherit_id" ref="eclipse_coti.cotizacion_view_form"/>
             <field name="arch" type="xml">
@@ -234,7 +234,7 @@
                     <field name="precios" colspan="2">
                         <tree string="Precios" editable="bottom">
                             <field name="cantidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
-                            <field name="precio_unitario" readonly="1"/>
+                            <field name="precio_unitario" attrs="{'invisible': [('state','in',('draft','submitted','validating'))]}" readonly="1"/>
                             <field name="observacion" readonly="1"/>
                             <field name="state" invisible="1"/>
                         </tree>
@@ -307,7 +307,6 @@
             <field name="res_model">eclipse.cotizacion</field>
             <field name="view_mode">list,form</field>
             <field name="view_type">tree</field>
-            <field name="domain">[('state','!=','validated')]</field>
         </record>
 
         <menuitem action="act_open_cotizacion_1" id="menu_open_cotizacion_1"

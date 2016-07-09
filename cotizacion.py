@@ -3,6 +3,7 @@ from openerp import models, fields, api, exceptions
 from openerp.exceptions import ValidationError
 from openerp.osv import osv
 from datetime import datetime
+from openerp import SUPERUSER_ID
 
 OPCIONES_1 = {
     'Offset': ['Editorial', 'Producto'],
@@ -62,15 +63,15 @@ class cotizacion(models.Model):
     largo_final = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     ancho_final = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
-    tintas_a = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
-    tintas_b = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_a = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    tintas_b = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     #Barnices
     barniz_mate_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
     barniz_mate_b = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
     barniz_brillante_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     barniz_brillante_b = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
-    pantone = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
+    pantone = fields.Char("Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas (solo Forros)
     n_paginas = fields.Integer(u"No. Páginas", required=True, readonly=True, states={'draft':[('readonly',False)]})
     
@@ -82,10 +83,10 @@ class cotizacion(models.Model):
     largo_final_int = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]})
     ancho_final_int = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]})
     #Tintas a X b
-    tintas_a_int = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
-    tintas_b_int = fields.Selection([(x,x) for x in '01234'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_a_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_b_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
-    pantone_int = fields.Selection([(x,x) for x in '12345'], string="Pantone", readonly=True, states={'draft':[('readonly',False)]})
+    pantone_int = fields.Char("Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas
     n_paginas_int = fields.Integer(u"No. Páginas", readonly=True, states={'draft':[('readonly',False)]})
     tipo_paginas_int = fields.Selection([("iguales", "Iguales"),("diferentes", "Diferentes")], string=u"Tipo páginas", readonly=True, states={'draft':[('readonly',False)]})
@@ -186,7 +187,15 @@ class cotizacion(models.Model):
         
     def action_validar(self, cr, uid, ids, context=None):
         val_obj = self.pool.get("eclipse.cotizacion.validacion")
+        user_obj = self.pool.get("res.users")
+        adrian = user_obj.search(cr, uid, [('name', '=', 'Adrian Mess')])[0]
         for id in ids:
+            rec = self.browse(cr, uid, id)
+            for cantidad in rec.precios:
+                if cantidad.cantidad * cantidad.precio_unitario >= 25000:
+                    if uid not in (adrian, SUPERUSER_ID):
+                        raise osv.except_osv(u"Acción inválida", u"Una de las líneas pasa de $25 mil, se requiere validación de Adrian Mess")
+                    break
             validaciones_user = val_obj.search(cr, uid, [
                 ('user_id','=',uid),
                 ('cotizacion_id','=',id)])
@@ -197,7 +206,7 @@ class cotizacion(models.Model):
                 'user_id': uid
             })
             rec = self.browse(cr, uid, id)
-            if len(rec.validaciones) >= 2:
+            if len(rec.validaciones) >= 2 or uid in (adrian, SUPERUSER_ID):
                 self.write(cr, uid, [rec.id], {'state': 'validated'})
         return True
 
