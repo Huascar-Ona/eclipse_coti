@@ -138,9 +138,11 @@
                                 <div>
                                     <field name="papel_int"
                                         options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
-                                        attrs="{'required': [('es_editorial','=',True),('papel_otro_int','=',False)]}"/>
+                                        attrs="{'required': [('es_editorial','=',True),('papel_otro_int','=',False)],
+                                            'invisible': [('papel_otro_int','!=',False)]}"/>
                                     <label string="Otro" class="oe_inline"/>
-                                    <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"/>
+                                    <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"
+                                        attrs="{'invisible':[('papel_int','!=',False)]}"/>
                                 </div>
                             </group>
                             <group>
@@ -188,9 +190,11 @@
                                 <div>
                                     <field name="papel"
                                         options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
-                                        attrs="{'required': [('papel_otro','=',False)]}"/>
+                                        attrs="{'required': [('papel_otro','=',False)],
+                                            'invisible': [('papel_otro','!=',False)]}"/>
                                     <label string="Otro" class="oe_inline"/>
-                                    <field name="papel_otro" class="oe_inline" placeholder="Especificar"/>
+                                    <field name="papel_otro" class="oe_inline" placeholder="Especificar"
+                                        attrs="{'invisible':[('papel','!=',False)]}"/>
                                 </div>
                             </group>
                         </group>
