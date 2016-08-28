@@ -188,13 +188,17 @@ class cotizacion(models.Model):
     def action_validar(self, cr, uid, ids, context=None):
         val_obj = self.pool.get("eclipse.cotizacion.validacion")
         user_obj = self.pool.get("res.users")
-        adrian = user_obj.search(cr, uid, [('name', '=', 'Adrian Mees')])[0]
+        user = user_obj.browse(cr, uid, uid)
+        grupo_validar_25 = self.pool.get("ir.model.data").get_object(cr, uid, 'eclipse_coti', 'grupo_validar_25').id
+        user_groups = [x.id for x in user.groups_id]
+        adrian = user_obj.search(cr, uid, [('name', '=', 'Adrian Mees')])
+        adrian = adrian[0] if adrian else 0
         for id in ids:
             rec = self.browse(cr, uid, id)
             for cantidad in rec.precios:
                 if cantidad.cantidad * cantidad.precio_unitario >= 25000:
-                    if uid not in (adrian, SUPERUSER_ID):
-                        raise osv.except_osv(u"Acción inválida", u"Una de las líneas pasa de $25 mil, se requiere validación de Adrian Mees")
+                    if uid not in (adrian, SUPERUSER_ID) and grupo_validar_25 not in user_groups:
+                        raise osv.except_osv(u"Acción inválida", u"Una de las líneas pasa de $25 mil, se requiere validación de Adrian Mees, de administrador o de miembro del grupo 'Validar más de $25mil'")
                     break
             validaciones_user = val_obj.search(cr, uid, [
                 ('user_id','=',uid),

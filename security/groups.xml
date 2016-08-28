@@ -15,6 +15,11 @@
             <field name="name">Cotizaciones</field>
             <field name="category_id" ref="eclipse_coti.module_category"/>
         </record>
+
+        <record model="res.groups" id="grupo_validar_25">
+            <field name="name">Validar más de $25mil</field>
+            <field name="category_id" ref="eclipse_coti.module_category"/>
+        </record>
         
         
     </data>
