@@ -93,7 +93,8 @@
             <field name="arch" type="xml">
                 <form string="Acabado">
                     <group>
-                        <field name="acabado_id" style="width:30%%" on_change="onchange_acabado_id(acabado_id)"/>
+                        <field name="acabado_id" style="width:30%%" on_change="onchange_acabado_id(acabado_id)"
+                            options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
                     </group>
                     <field name="show_datos" invisible="1"/>
                     <div attrs="{'invisible':[('show_datos','=',False)]}">
