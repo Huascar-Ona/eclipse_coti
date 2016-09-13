@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_eclipse_cotizacion_papel,access_eclipse_cotizacion_papel,model_eclipse_cotizacion_papel,,1,1,1,1
+access_eclipse_cotizacion_papel,access_eclipse_cotizacion_papel,model_eclipse_cotizacion_papel,,1,0,0,0
+access_eclipse_cotizacion_papel,access_eclipse_cotizacion_papel,model_eclipse_cotizacion_papel,eclipse_coti.grupo_config,1,1,1,1
 access_eclipse_cotizacion_opcion,access_eclipse_cotizacion_opcion,model_eclipse_cotizacion_opcion,,1,1,1,1
 access_eclipse_cotizacion,access_eclipse_cotizacion,model_eclipse_cotizacion,,1,1,1,1
 access_eclipse_cotizacion_validacion,access_eclipse_cotizacion_validacion,model_eclipse_cotizacion_validacion,,1,1,1,1

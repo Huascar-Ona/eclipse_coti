@@ -30,6 +30,7 @@ class vendedor(models.Model):
 
 class cotizacion(models.Model):
     _name = "eclipse.cotizacion"
+    _order = "name desc"
 
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
@@ -43,9 +44,9 @@ class cotizacion(models.Model):
     #Opciones
     diseno = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Diseño", readonly=True, states={'draft':[('readonly',False)]})
     flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Flete Foráneo", readonly=True, states={'draft':[('readonly',False)]})
-    tienes_costo = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"¿Tienes el costo?")
+    tienes_costo = fields.Selection([("s", "Sí"), ("n", "No")], readonly=True, states={'draft':[('readonly',False)]}, required=True, string=u"¿Tienes el costo?")
     costo_flete = fields.Float("Costo flete", readonly=True, states={'draft':[('readonly',False)]})
-    codigos_postales = fields.One2many("eclipse.cotizacion.cp", "cotizacion_id", string=u"Códigos Potales")
+    codigos_postales = fields.One2many("eclipse.cotizacion.cp", "cotizacion_id", readonly=True, states={'draft':[('readonly',False)]}, string=u"Códigos Potales")
     opcion1 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string="Proceso", domain=[('name', 'in', list(OPCIONES_1.keys()))], readonly=True, states={'draft':[('readonly',False)]})
     opcion2 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Tipo", readonly=True, states={'draft':[('readonly',False)]})
     opcion3 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Subtipo", readonly=True, states={'draft':[('readonly',False)]})
@@ -85,6 +86,11 @@ class cotizacion(models.Model):
     #Tintas a X b
     tintas_a_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     tintas_b_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    #Barnices
+    barniz_mate_a_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
+    barniz_mate_b_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
+    barniz_brillante_a_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
+    barniz_brillante_b_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
     pantone_int = fields.Char("Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas
@@ -106,12 +112,12 @@ class cotizacion(models.Model):
     
     #Precios y observaciones
     precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]}, copy=True)
-    observaciones = fields.Text("Observaciones")
+    observaciones = fields.Text("Observaciones", states={'cancel':[('readonly',True)]})
     
     #Variables de control
-    validaciones = fields.One2many("eclipse.cotizacion.validacion", "cotizacion_id", string="Validaciones")
+    validaciones = fields.One2many("eclipse.cotizacion.validacion", "cotizacion_id", string="Validaciones",  states={'cancel':[('readonly',True)]})
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
-        ('validating', 'Esperando validación'), ('validated', 'Validada')], string="Estado", default="draft")
+        ('validating', 'Esperando validación'), ('validated', 'Validada'), ('cancel', 'Cancelada')], string="Estado", default="draft")
 
     _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
 
@@ -124,6 +130,10 @@ class cotizacion(models.Model):
         if vals.get("name", "/") == "/":
             vals["name"] = self.pool.get('ir.sequence').get(cr, uid, 'secuencia.cotizacion')
         return super(cotizacion, self).create(cr, uid, vals, context=context)
+
+    def action_cancel(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'cancel'})
+        return True
 
     def onchange_opcion1(self, cr, uid, ids, opcion1, context=None):
         if opcion1:

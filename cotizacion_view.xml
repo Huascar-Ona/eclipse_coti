@@ -7,7 +7,7 @@
             <field name="name">cotizacion.view.tree</field>
             <field name="model">eclipse.cotizacion</field>
             <field name="arch" type="xml">
-                <tree string="Cotizaciones">
+                <tree string="Cotizaciones" colors="blue:state=='draft';green:state=='validated';lightgray:state=='cancel'">
                     <field name="name"/>
                     <field name="fecha"/>
                     <field name="empresa"/>
@@ -16,12 +16,29 @@
             </field>
         </record>
 
+        <!-- Vista de búsqueda -->
+        <record id="cotizacion_view_search" model="ir.ui.view">
+            <field name="name">cotizacion search view</field>
+            <field name="model">eclipse.cotizacion</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="empresa"/>
+                    <filter name="Requisiciones" domain="[('state','=','draft')]"/>
+                    <filter name="Solicitadas" domain="[('state','=','submitted')]"/>
+                    <filter name="Validando" domain="[('state','=','validating')]"/>
+                    <filter name="Validadas" domain="[('state','=','validated')]"/>
+                    <filter name="Canceladas" domain="[('state','=','cancel')]"/>
+                </search>
+            </field>
+        </record>
+
         <!-- Vista de arbol flete-->
         <record id="cotizacion_flete_view_tree" model="ir.ui.view">
             <field name="name">cotizacion.view.tree</field>
             <field name="model">eclipse.cotizacion.flete</field>
             <field name="arch" type="xml">
-                <tree string="Cotizaciones">
+                <tree string="Cotizaciones" colors="blue:state=='draft'">
                     <field name="name"/>
                     <field name="fecha"/>
                     <field name="empresa"/>
@@ -44,6 +61,8 @@
                             states="submitted" groups="eclipse_coti.grupo_cotizacion"/>
                         <button name="action_validar" type="object" string="Validar"
                             states="validating" groups="eclipse_coti.grupo_cotizacion"/> 
+                        <button name="action_cancel" type="object" string="Cancelar"
+                            states="draft,submitted"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet string="Cotización">
@@ -123,6 +142,19 @@
                                     <field name="tintas_b_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
                                 </div>
+                                <label string="Barniz Máquina Mate"/>
+                                <div>
+                                    <field name="barniz_mate_a_int" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="barniz_mate_b_int" class="oe_inline"/>
+                                </div>
+                                <label string="Barniz Máquina Brillante"/>
+                                <div>
+                                    <field name="barniz_brillante_a_int" class="oe_inline"/>
+                                    <label string="x" class="oe_inline"/>
+                                    <field name="barniz_brillante_b_int" class="oe_inline"/>
+                                </div>
+
                                 <label string="Pantone" attrs="{'invisible':[('es_digital','=',True)]}"/>
                                 <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="pantone_int"/>
@@ -307,7 +339,7 @@
         
         <!-- Acción y menú -->
         <record id="act_open_cotizacion_1" model="ir.actions.act_window">
-            <field name="name">Requisiciones</field>
+            <field name="name">Cotizaciones</field>
             <field name="res_model">eclipse.cotizacion</field>
             <field name="view_mode">list,form</field>
             <field name="view_type">tree</field>
@@ -315,7 +347,7 @@
 
         <menuitem action="act_open_cotizacion_1" id="menu_open_cotizacion_1"
             parent="eclipse_coti.menu_coti" sequence="10"
-            groups="eclipse_coti.grupo_requisicion"/>
+            groups="eclipse_coti.grupo_requisicion,eclipse_coti.grupo_cotizacion"/>
 
         <record id="act_open_cotizacion_2" model="ir.actions.act_window">
             <field name="name">Cotizaciones</field>
@@ -325,9 +357,9 @@
             <field name="domain">[('state','!=','draft')]</field>
         </record>
 
-        <menuitem action="act_open_cotizacion_2" id="menu_open_cotizacion_2"
+        <!--<menuitem action="act_open_cotizacion_2" id="menu_open_cotizacion_2"
             parent="eclipse_coti.menu_coti" sequence="20"
-            groups="eclipse_coti.grupo_cotizacion"/>
+            groups="eclipse_coti.grupo_cotizacion"/>-->
 
         <record id="act_open_cotizacion_flete" model="ir.actions.act_window">
             <field name="name">Flete</field>
