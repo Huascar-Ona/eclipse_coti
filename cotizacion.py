@@ -13,7 +13,9 @@ OPCIONES_1 = {
 
 OPCIONES_2 = {
     'Editorial': ['Catálogo', 'Block', 'Libro', 'Manual', 'Revista', 'Otro'],
-    'Producto': ['Caja', 'Cuadríptico', 'Díptico', 'Etiqueta', 'Flyer', 'Folder', 'Otro']
+    'Producto': ['Caja', 'Cuadríptico', 'Díptico', 'Etiqueta', 'Flyer', 'Folder', 
+        'Volante', 'Encarte', 'Tríptico', 'Políptico', 'Póster', 'Dangler', 'Stopper', 'Cenefa', 
+        'Planilla de etiquetas', 'Colgante', 'Tarjeta', 'Otro']
 }
 
 OPCIONES_PLOTTER = ['Póster', 'Otro']
@@ -43,78 +45,102 @@ class cotizacion(models.Model):
     
     #Opciones
     diseno = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Diseño", readonly=True, states={'draft':[('readonly',False)]})
+    check_diseno = fields.Boolean(u"Check Diseño", readonly=True, states={'validating':[('readonly',False)]})
     flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Flete Foráneo", readonly=True, states={'draft':[('readonly',False)]})
+    check_flete = fields.Boolean(u"Check Flete", readonly=True, states={'validating':[('readonly',False)]})
     tienes_costo = fields.Selection([("s", "Sí"), ("n", "No")], readonly=True, states={'draft':[('readonly',False)]}, required=True, string=u"¿Tienes el costo?")
     costo_flete = fields.Float("Costo flete", readonly=True, states={'draft':[('readonly',False)]})
     codigos_postales = fields.One2many("eclipse.cotizacion.cp", "cotizacion_id", readonly=True, states={'draft':[('readonly',False)]}, string=u"Códigos Potales")
     opcion1 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string="Proceso", domain=[('name', 'in', list(OPCIONES_1.keys()))], readonly=True, states={'draft':[('readonly',False)]})
+    check_opcion1 = fields.Boolean(u"Check Opción 1", readonly=True, states={'validating':[('readonly',False)]})
     opcion2 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Tipo", readonly=True, states={'draft':[('readonly',False)]})
+    check_opcion2 = fields.Boolean(u"Check Opción 2", readonly=True, states={'validating':[('readonly',False)]})
     opcion3 = fields.Many2one("eclipse.cotizacion.opcion", required=True, string=u"Subtipo", readonly=True, states={'draft':[('readonly',False)]})
+    check_opcion3 = fields.Boolean(u"Check Opción 3", readonly=True, states={'validating':[('readonly',False)]})
     show_otro = fields.Boolean("Mostrar Otro", default=False)
-    opcion_otro = fields.Char("Especificar", readonly=True, states={'draft':[('readonly',False)]})
+    opcion_otro = fields.Char("Especificar", readonly=True, states={'validating':[('readonly',False)]})
     es_editorial = fields.Boolean("Es Editorial", default=False)
     es_digital = fields.Boolean("Es Digital", default=False)
     es_plotter = fields.Boolean("Es Plotter", default=False)
     
     #Para Produto y para Editorial - Forros:
     #Medida extendida en cm
+    check_medida_ext = fields.Boolean(u"Check Medida ext", readonly=True, states={'validating':[('readonly',False)]})
     largo_ext = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     ancho_ext = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Medida final en cm
+    check_medida_final = fields.Boolean(u"Check Medida Final", readonly=True, states={'validating':[('readonly',False)]})
     largo_final = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     ancho_final = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
+    check_tintas = fields.Boolean(u"Check Tintas", readonly=True, states={'validating':[('readonly',False)]})
     tintas_a = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tintas_b = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     #Barnices
+    check_barniz_mate = fields.Boolean(u"Check Barniz Mate", readonly=True, states={'validating':[('readonly',False)]})
     barniz_mate_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
     barniz_mate_b = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
+    check_barniz_brillante = fields.Boolean(u"Check Barniz Brillante", readonly=True, states={'validating':[('readonly',False)]})
     barniz_brillante_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     barniz_brillante_b = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
+    check_pantone = fields.Boolean(u"Check Pantone", readonly=True, states={'validating':[('readonly',False)]})
     pantone = fields.Char("Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas (solo Forros)
+    check_n_paginas = fields.Boolean(u"Check N Paginas", readonly=True, states={'validating':[('readonly',False)]})
     n_paginas = fields.Integer(u"No. Páginas", required=True, readonly=True, states={'draft':[('readonly',False)]})
     
     #Para Editorial - Interiores:
     #Medida extendida en cm
+    check_medida_ext_int = fields.Boolean(u"Check Medida ext int", readonly=True, states={'validating':[('readonly',False)]})
     largo_ext_int = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]})
     ancho_ext_int = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]})
     #Medida final en cm
+    check_medida_final_int = fields.Boolean(u"Check Medida final int", readonly=True, states={'validating':[('readonly',False)]})
     largo_final_int = fields.Float("Largo", readonly=True, states={'draft':[('readonly',False)]})
     ancho_final_int = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]})
     #Tintas a X b
+    check_tintas_int = fields.Boolean(u"Check Tintas int", readonly=True, states={'validating':[('readonly',False)]})
     tintas_a_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     tintas_b_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     #Barnices
+    check_barniz_mate_int = fields.Boolean(u"Check Barniz mate int", readonly=True, states={'validating':[('readonly',False)]})
     barniz_mate_a_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
     barniz_mate_b_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
+    check_barniz_brillante_int = fields.Boolean(u"Check Barniz brillante int", readonly=True, states={'validating':[('readonly',False)]})
     barniz_brillante_a_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     barniz_brillante_b_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina brillante", readonly=True, states={'draft':[('readonly',False)]})
     #Pantone
+    check_pantone_int = fields.Boolean(u"Check Pantone int", readonly=True, states={'validating':[('readonly',False)]})
     pantone_int = fields.Char("Pantone", readonly=True, states={'draft':[('readonly',False)]})
     #No. páginas
+    check_n_paginas_int = fields.Boolean(u"Check N Paginas int", readonly=True, states={'validating':[('readonly',False)]})
     n_paginas_int = fields.Integer(u"No. Páginas", readonly=True, states={'draft':[('readonly',False)]})
+    check_tipo_paginas_int = fields.Boolean(u"Check Tipo paginas int", readonly=True, states={'validating':[('readonly',False)]})
     tipo_paginas_int = fields.Selection([("iguales", "Iguales"),("diferentes", "Diferentes")], string=u"Tipo páginas", readonly=True, states={'draft':[('readonly',False)]})
 
     #Tipo de papel
+    check_papel = fields.Boolean(u"Check Papel", readonly=True, states={'validating':[('readonly',False)]})
     papel = fields.Many2one("eclipse.cotizacion.papel", string="Papel", readonly=True, states={'draft':[('readonly',False)]})
     papel_otro = fields.Char("Otro: (Especificar)", readonly=True, states={'draft':[('readonly',False)]})
     #Para Editorial- Interiores
+    check_papel_int = fields.Boolean(u"Check Papel int", readonly=True, states={'validating':[('readonly',False)]})
     papel_int = fields.Many2one("eclipse.cotizacion.papel", string="Papel", readonly=True, states={'draft':[('readonly',False)]})
     papel_otro_int = fields.Char("Otro: (Especificar)", readonly=True, states={'draft':[('readonly',False)]})
     
     #Acabados
     #Ambos:
-    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]}, copy=True)
+    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)],'submitted':[('readonly',False)]}, copy=True)
     #Solo Editorial:
+    check_tipo_encuadernado = fields.Boolean(u"Check Tipo Encuadernado", readonly=True, states={'validating':[('readonly',False)]})
     tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]}, domain=[('acabado','=','Encuadernación')])
     
     #Precios y observaciones
     precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]}, copy=True)
-    observaciones = fields.Text("Observaciones", states={'cancel':[('readonly',True)]})
+    observaciones = fields.Text("Observaciones", readonly=True, states={'draft':[('readonly',False)]})
     
     #Variables de control
+    bloqueada = fields.Many2one("res.users", string=u"Cotizador")
     validaciones = fields.One2many("eclipse.cotizacion.validacion", "cotizacion_id", string="Validaciones",  states={'cancel':[('readonly',True)]})
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
         ('validating', 'Esperando validación'), ('validated', 'Validada'), ('cancel', 'Cancelada')], string="Estado", default="draft")
@@ -130,6 +156,16 @@ class cotizacion(models.Model):
         if vals.get("name", "/") == "/":
             vals["name"] = self.pool.get('ir.sequence').get(cr, uid, 'secuencia.cotizacion')
         return super(cotizacion, self).create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        this = self.browse(cr, uid, ids[0])
+        if this.bloqueada and this.bloqueada.id != uid:
+            raise osv.except_osv("Blouqeada", u"La cotización está bloqueada")
+        return super(cotizacion, self).write(cr, uid, ids, vals, context=context)
+
+    def action_bloquear(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'bloqueada': uid})
+        return True
 
     def action_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state': 'cancel'})
@@ -286,8 +322,8 @@ class cotizacion_precio(models.Model):
 
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     cantidad = fields.Float("Cantidad", digits=(14,0), readonly=True, states={'draft':[('readonly',False)]})
-    precio_unitario = fields.Float("Precio Unitario", readonly=True, states={'submitted':[('readonly',False)]})
-    observacion = fields.Text(u"Observación")
+    precio_unitario = fields.Float("Precio Unitario", digits=(14,4), readonly=True, states={'validating':[('readonly',False)],'submitted':[('readonly',False)]})
+    observacion = fields.Text(u"Observación", readonly=True, states={'draft':[('readonly',False)]})
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
         ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado", default="draft")
     

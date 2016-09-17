@@ -12,6 +12,7 @@
                     <field name="fecha"/>
                     <field name="empresa"/>
                     <field name="state"/>
+                    <field name="bloqueada"/>
                 </tree>
             </field>
         </record>
@@ -26,7 +27,7 @@
                     <field name="empresa"/>
                     <filter name="Requisiciones" domain="[('state','=','draft')]"/>
                     <filter name="Solicitadas" domain="[('state','=','submitted')]"/>
-                    <filter name="Validando" domain="[('state','=','validating')]"/>
+                    <filter name="Esperando validación" domain="[('state','=','validating')]"/>
                     <filter name="Validadas" domain="[('state','=','validated')]"/>
                     <filter name="Canceladas" domain="[('state','=','cancel')]"/>
                 </search>
@@ -63,9 +64,17 @@
                             states="validating" groups="eclipse_coti.grupo_cotizacion"/> 
                         <button name="action_cancel" type="object" string="Cancelar"
                             states="draft,submitted"/>
+                        <button name="action_bloquear" groups="eclipse_coti.grupo_cotizacion" type="object"
+                            string="Bloquear" attrs="{'invisible':['|', ('state','!=','submitted'), ('bloqueada','!=',False)]}"
+                            confirm="Confirmar bloqueo de cotización (solo el usuario actual podrá trabajar en ella)"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet string="Cotización">
+                        <div attrs="{'invisible':['|',('bloqueada','=',False),('state','!=','submitted')]}">
+                            <h2>En proceso de cotización. Bloqueada por
+                                <field name="bloqueada" readonly="1"/>
+                            </h2>
+                        </div>
                         <h1>
                             <label string="Requisición" attrs="{'invisible':[('state','!=','draft')]}"/>
                             <label string="Cotización" attrs="{'invisible':[('state','=','draft')]}"/>
@@ -85,15 +94,34 @@
                         </group>
                         <group>
                             <group string="Opciones del proceso">
-                                <field name="diseno"/>
-                                <field name="opcion1" on_change="onchange_opcion1(opcion1)"
-                                    options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
-                                <field name="opcion2" on_change="onchange_opcion2(opcion1, opcion2)" 
-                                    domain="[('id','=',0)]"
-                                    options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
-                                <field name="opcion3" on_change="onchange_opcion3(opcion3)"
-                                    domain="[('id','=',0)]"
-                                    options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"/>
+                                <label for="diseno"/>
+                                <div>
+                                    <field name="diseno" class="oe_inline"/>
+                                    <field name="check_diseno" nolabel="1" class="oe_inline" states="submitted,validating"/>
+                                </div>
+                                <label for="opcion1"/>
+                                <div>
+                                    <field name="opcion1" on_change="onchange_opcion1(opcion1)"
+                                        options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
+                                        class="oe_inline"/>
+                                    <field name="check_opcion1" nolabel="1" class="oe_inline" states="submitted,validating"/>
+                                </div>
+                                <label for="opcion2"/>
+                                <div>
+                                    <field name="opcion2" on_change="onchange_opcion2(opcion1, opcion2)" 
+                                        domain="[('id','=',0)]"
+                                        options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
+                                        class="oe_inline"/>
+                                    <field name="check_opcion2" nolabel="1" class="oe_inline" states="submitted,validating"/>
+                                </div>
+                                <label for="opcion3"/>
+                                <div>
+                                    <field name="opcion3" on_change="onchange_opcion3(opcion3)"
+                                        domain="[('id','=',0)]"
+                                        options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
+                                        class="oe_inline"/>
+                                    <field name="check_opcion3" nolabel="1" class="oe_inline" states="submitted,validating"/>
+                                </div>
                                 <field name="show_otro" invisible="1"/>
                                 <field name="opcion_otro" attrs="{'invisible':[('show_otro','=',False)],
                                     'required': [('show_otro','=',True)]}"/>
@@ -102,7 +130,11 @@
                                 <field name="es_plotter" invisible="1"/>
                             </group>
                             <group>
-                                <field name="flete"/>
+                                <label for="flete"/>
+                                <div>
+                                    <field name="flete" class="oe_inline"/>
+                                    <field name="check_flete" class="oe_inline" states="submitted,validating"/>
+                                </div>
                                 <field name="tienes_costo" attrs="{'invisible': [('flete','!=','s')],
                                     'required': [('flete','=','s')]}"/>
                                 <field name="costo_flete" attrs="{'invisible': [('tienes_costo','!=','s')],
@@ -125,6 +157,7 @@
                                     <label string="x" class="oe_inline"/>
                                     <field name="ancho_ext_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="check_medida_ext_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <label string="Medida final en cm"/>
                                 <div>
@@ -133,6 +166,7 @@
                                     <label string="x" class="oe_inline"/>
                                     <field name="ancho_final_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="check_medida_final_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <label string="Tintas"/>
                                 <div>
@@ -141,23 +175,27 @@
                                     <label string="x" class="oe_inline"/>
                                     <field name="tintas_b_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="check_tintas_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <label string="Barniz Máquina Mate"/>
                                 <div>
                                     <field name="barniz_mate_a_int" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_mate_b_int" class="oe_inline"/>
+                                    <field name="check_barniz_mate_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <label string="Barniz Máquina Brillante"/>
                                 <div>
                                     <field name="barniz_brillante_a_int" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_brillante_b_int" class="oe_inline"/>
+                                    <field name="check_barniz_brillante_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
 
                                 <label string="Pantone" attrs="{'invisible':[('es_digital','=',True)]}"/>
                                 <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="pantone_int"/>
+                                    <field name="check_pantone_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
                                 <div attrs="{'invisible':[('es_editorial','=',False)]}">
@@ -165,6 +203,7 @@
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
                                     <field name="tipo_paginas_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="check_n_paginas_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <label string="Tipo de papel"/>
                                 <div>
@@ -172,51 +211,59 @@
                                         options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
                                         attrs="{'required': [('es_editorial','=',True),('papel_otro_int','=',False)],
                                             'invisible': [('papel_otro_int','!=',False)]}"/>
-                                    <label string="Otro" class="oe_inline"/>
+                                    <label string="Otro" class="oe_inline" attrs="{'invisible':[('papel_int','!=',False)]}"/>
                                     <field name="papel_otro_int" class="oe_inline" placeholder="Especificar"
                                         attrs="{'invisible':[('papel_int','!=',False)]}"/>
+                                    <field name="check_papel_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                             </group>
                             <group>
                                 <separator string="Forros" colspan="2"
                                     attrs="{'invisible':[('es_editorial','=',False)]}"/>
-                                <label string="Medida extendida en cm"/>
+                                <label string="Medida extendida en cm" class="oe_inline"/>
                                 <div>
                                     <field name="largo_ext" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="ancho_ext" class="oe_inline"/>
+                                    <field name="check_medida_ext" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
                                 <label string="Medida final en cm"/>
                                 <div>
                                     <field name="largo_final" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="ancho_final" class="oe_inline"/>
+                                    <field name="check_medida_final" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
                                 <label string="Tintas"/>
                                 <div>
                                     <field name="tintas_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
                                     <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)],'required': [('es_plotter','=',False)]}"/>
+                                    <field name="check_tintas" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
                                 <label string="Barniz Máquina Mate"/>
                                 <div>
                                     <field name="barniz_mate_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_mate_b" class="oe_inline"/>
+                                    <field name="check_barniz_mate" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
                                 <label string="Barniz Máquina Brillante"/>
                                 <div>
                                     <field name="barniz_brillante_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_brillante_b" class="oe_inline"/>
+                                    <field name="check_barniz_brillante" class="oe_inline" nolabel="1" states="submitted,validating"/>    
                                 </div>
                                 <label string="Pantone" attrs="{'invisible':['|',('es_plotter','=',True),('es_digital','=',True)]}"/>
                                 <div attrs="{'invisible':['|',('es_plotter','=',True),('es_digital','=',True)]}">
                                     <field name="pantone"/>
+                                    <field name="check_pantone" class="oe_inline" nolabel="1" states="submitted,validating"/>
                                 </div>
                                 <label string="No. páginas" attrs="{'invisible':[('es_editorial','=',False)]}"/>
                                 <div attrs="{'invisible':[('es_editorial','=',False)]}">
                                     <field name="n_paginas" attrs="{'required':[('es_editorial','=',True)]}"/>
+                                    <field name="check_n_paginas" class="oe_inline" nolabel="1" states="submitted,validating"/>
                                 </div>
                                 <label string="Tipo de papel"/>
                                 <div>
@@ -224,19 +271,23 @@
                                         options="{'no_quick_create':True,'no_create_edit':True, 'no_open': True}"
                                         attrs="{'required': [('papel_otro','=',False)],
                                             'invisible': [('papel_otro','!=',False)]}"/>
-                                    <label string="Otro" class="oe_inline"/>
+                                    <label string="Otro" class="oe_inline" attrs="{'invisible':[('papel','!=',False)]}"/>
                                     <field name="papel_otro" class="oe_inline" placeholder="Especificar"
                                         attrs="{'invisible':[('papel','!=',False)]}"/>
+                                    <field name="check_papel" class="oe_inline" nolabel="1" states="submitted,validating"/>
                                 </div>
                             </group>
                         </group>
                         <div attrs="{'invisible':[('opcion3','=',False)]}">
                             <group attrs="{'invisible':[('es_editorial','=',False)]}">
                                 <field name="tipo_encuadernado" style="width:33%"/>
+                                <field name="check_tipo_encuadernado" class="oe_inline" nolabel="1" states="submitted,validating"/>
                             </group>
                             <separator string="Acabados" colspan="2"/>
                             <field name="acabados" colspan="2">
                                 <tree string="Acabados">
+                                    <field name="state" invisible="1"/>
+                                    <field name="check" attrs="{'invisible':[('state','not in',('submitted','validating'))]}"/>
                                     <field name="acabado_id"/>
                                     <field name="display_datos"/>
                                 </tree>
@@ -289,7 +340,7 @@
                     <field name="precios" colspan="2">
                         <tree string="Precios" editable="bottom">
                             <field name="cantidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
-                            <field name="precio_unitario" attrs="{'readonly': [('state','in',('draft','validating','validated'))]}"/>
+                            <field name="precio_unitario" attrs="{'readonly': [('state','in',('draft','validated'))]}"/>
                             <field name="observacion"/>
                             <field name="state" invisible="1"/>
                         </tree>

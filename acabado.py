@@ -50,11 +50,14 @@ class acabado_dato_opcion(models.Model):
 class instancia_acabado(models.Model):
     _name = "eclipse.cotizacion.acabado.inst"
 
+    check = fields.Boolean("Check")
     acabado_id = fields.Many2one("eclipse.cotizacion.acabado", string="Nombre", required=True)
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     datos = fields.One2many("eclipse.cotizacion.acabado.dato.inst", "acabado_inst_id", copy=True)
     show_datos = fields.Boolean("Pedir datos", default=False)
     display_datos = fields.Text("Datos", compute="_get_display_datos")
+    state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
+        ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado", default="draft")
     
     @api.depends("datos")
     def _get_display_datos(self):
