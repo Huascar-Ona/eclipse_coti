@@ -39,7 +39,7 @@
             <field name="name">cotizacion.view.tree</field>
             <field name="model">eclipse.cotizacion.flete</field>
             <field name="arch" type="xml">
-                <tree string="Cotizaciones" colors="blue:state=='draft'">
+                <tree string="Cotizaciones" colors="blue:state=='draft',lightgray:state=='cancel'">
                     <field name="name"/>
                     <field name="fecha"/>
                     <field name="empresa"/>
@@ -358,6 +358,8 @@
                 <form string="Cotizaciones flete">
                     <header>
                         <button name="action_solicitar_cotizacion" string="Solicitar cotización" type="object" states="draft"/>
+                        <button name="action_validate" string="Validar" type="object" states="submitted" groups="eclipse_coti.grupo_cotizacion"/>
+                        <button name="action_cancel" string="Cancelar" type="object" states="draft,submitted,validated"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet string="Cotización">

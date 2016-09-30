@@ -346,9 +346,17 @@ class cotizacion_flete(models.Model):
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
     costo_flete = fields.Float("Costo Flete", readonly=True, states={'submitted':[('readonly',False)]})
     descripcion = fields.Text(u"Descripción",  readonly=True, states={'draft':[('readonly',False)]})
-    state = fields.Selection([('draft','Borrador'),('submitted','Solicitada')], string="Estado", default="draft")
+    state = fields.Selection([('draft','Borrador'),('submitted','Solicitada'),('validated', 'Validada'),('cancel','Cancelada')], string="Estado", default="draft")
 
     _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
+
+    def action_cancel(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'cancel'})
+        return True
+
+    def action_validate(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'validated'})
+        return True
 
     def copy(self, cr, uid, id, default={}, context=None):
         if default is None: default={}
