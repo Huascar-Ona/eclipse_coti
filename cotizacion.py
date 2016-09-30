@@ -12,10 +12,10 @@ OPCIONES_1 = {
 }
 
 OPCIONES_2 = {
-    'Editorial': ['Catálogo', 'Block', 'Libro', 'Manual', 'Revista', 'Otro'],
+    'Editorial': ['Catálogo', 'Block', 'Libro', 'Manual', 'Revista', 'Cuaderno', 'Libreta', 'Otro'],
     'Producto': ['Caja', 'Cuadríptico', 'Díptico', 'Etiqueta', 'Flyer', 'Folder', 
         'Volante', 'Encarte', 'Tríptico', 'Políptico', 'Póster', 'Dangler', 'Stopper', 'Cenefa', 
-        'Planilla de etiquetas', 'Colgante', 'Tarjeta', 'Otro']
+        'Planilla de etiquetas', 'Colgante', 'Tarjeta', 'Separador', 'Collarín', 'Sobre', 'Otro']
 }
 
 OPCIONES_PLOTTER = ['Póster', 'Otro']
@@ -130,14 +130,14 @@ class cotizacion(models.Model):
     
     #Acabados
     #Ambos:
-    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)],'submitted':[('readonly',False)]}, copy=True)
+    acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]}, copy=True)
     #Solo Editorial:
     check_tipo_encuadernado = fields.Boolean(u"Check Tipo Encuadernado", readonly=True, states={'submitted':[('readonly',False)]})
     tipo_encuadernado = fields.Many2one("eclipse.cotizacion.acabado", string="Tipo encuadernado", readonly=True, states={'draft':[('readonly',False)]}, domain=[('acabado','=','Encuadernación')])
     
     #Precios y observaciones
     precios = fields.One2many("eclipse.cotizacion.precio", "cotizacion_id", string="Precios", states={'validated':[('readonly',True)]}, copy=True)
-    observaciones = fields.Text("Observaciones", readonly=True, states={'draft':[('readonly',False)]})
+    observaciones = fields.Text("Observaciones", readonly=True, states={'draft':[('readonly',False)],'submitted':[('readonly',False)],'validating':[('readonly',False)]})
     
     #Variables de control
     bloqueada = fields.Many2one("res.users", string=u"Cotizador")
@@ -228,7 +228,7 @@ class cotizacion(models.Model):
         return True
 
     def action_solicitar_validacion(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state': 'validating'})
+        self.write(cr, uid, ids, {'state': 'validating', 'bloqueada': False})
         return True
         
     def action_validar(self, cr, uid, ids, context=None):
@@ -323,7 +323,7 @@ class cotizacion_precio(models.Model):
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     cantidad = fields.Float("Cantidad", digits=(14,0), readonly=True, states={'draft':[('readonly',False)]})
     precio_unitario = fields.Float("Precio Unitario", digits=(14,4), readonly=True, states={'validating':[('readonly',False)],'submitted':[('readonly',False)]})
-    observacion = fields.Text(u"Observación", readonly=True, states={'draft':[('readonly',False)]})
+    observacion = fields.Text(u"Observación", readonly=True, states={'draft':[('readonly',False)],'submitted':[('readonly',False)],'validating':[('readonly',False)]})
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
         ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado", default="draft")
     
