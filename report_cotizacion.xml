@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_cotizacion">
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <style>
+                table{width:50%}
+            </style>
+            <div class="page" style="font-size:x-small">
+                <h3>Cotización <span t-field="o.name"/></h3>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <strong>Fecha de solicitud </strong><span t-field="o.fecha"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Fecha de entrega </strong><span t-field="o.tiempo_de_entrega"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Agente </strong><span t-field="o.agente"/><br/>
+                        <strong>Atención a </strong><span t-field="o.atencion_a"/><br/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Empresa </strong><span t-field="o.empresa"/><br/>
+                        <strong>Tel. </strong><span t-field="o.tel"/><br/>
+                    </div>
+                </div>
+                <div class="row" style="padding:10px 10px 10px 10px">
+                    <div class="col-xs-3">
+                        <strong>Diseño </strong><span t-field="o.diseno"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Proceso </strong><span t-field="o.opcion1"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Tipo </strong><span t-field="o.opcion2"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Subtipo </strong><span t-field="o.opcion3"/>
+                    </div>
+                </div>
+                
+                <div class="row">
+                
+                    <t t-if="o.es_editorial">
+                        <div class="col-xs-6">
+                            <strong>Interiores</strong>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    Medida extendida en cm<br/>
+                                    Medida final en cm<br/>
+                                    Tintas<br/>
+                                    Barniz Máquina Mate<br/>
+                                    Barniz Máquina Brillante<br/>
+                                    Pantone<br/>
+                                    No. Páginas<br/>
+                                    Tipo de papel<br/>
+                                </div>
+                                <div class="col-xs-6">
+                                    <span t-field="o.largo_ext_int"/> x <span t-field="o.ancho_ext_int"/><br/>
+                                    <span t-field="o.largo_final_int"/> x <span t-field="o.ancho_final_int"/><br/>
+                                    <span t-field="o.tintas_a_int"/> x <span t-field="o.tintas_b_int"/><br/>
+                                    <span t-field="o.barniz_mate_a_int"/> x <span t-field="o.barniz_mate_b_int"/><br/>
+                                    <span t-field="o.barniz_brillante_a_int"/> x <span t-field="o.barniz_brillante_b_int"/><br/>
+                                    <span t-field="o.pantone_int"/><br/>
+                                    <span t-field="o.n_paginas_int"/> <span t-field="o.tipo_paginas_int"/><br/>
+                                    <t t-if="o.papel_int">
+                                        <span t-esc="o.papel_int.clasificacion + ' ' + o.papel_int.tipo + ' ' + str(o.papel_int.gramaje)"/>
+                                    </t>
+                                    <t t-if="not o.papel_int">
+                                        <span t.field="o.papel_otro_int"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    
+                    <div class="col-xs-6">
+                        <t t-if="o.es_editorial">
+                            <strong>Forros</strong>
+                        </t>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                Medida extendida en cm<br/>
+                                Medida final en cm<br/>
+                                Tintas<br/>
+                                Barniz Máquina Mate<br/>
+                                Barniz Máquina Brillante<br/>
+                                Pantone<br/>
+                                No. Páginas<br/>
+                                Tipo de papel<br/>
+                            </div>
+                            <div class="col-xs-6">
+                                <span t-field="o.largo_ext"/> x <span t-field="o.ancho_ext"/><br/>
+                                <span t-field="o.largo_final"/> x <span t-field="o.ancho_final"/><br/>
+                                <span t-field="o.tintas_a"/> x <span t-field="o.tintas_b"/><br/>
+                                <span t-field="o.barniz_mate_a"/> x <span t-field="o.barniz_mate_b"/><br/>
+                                <span t-field="o.barniz_brillante_a"/> x <span t-field="o.barniz_brillante_b"/><br/>
+                                <span t-field="o.pantone"/><br/>
+                                <span t-field="o.n_paginas"/><br/>
+                                <t t-if="o.papel">
+                                    <span t-esc="o.papel.clasificacion + ' ' + o.papel.tipo + ' ' + str(o.papel.gramaje)"/>
+                                </t>
+                                <t t-if="not o.papel_int">
+                                    <span t.field="o.papel_otro"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- fin datos proceso -->
+                
+                <div>
+                    <t t-if="o.es_editorial">
+                        <strong>Tipo encuadernado </strong> <span t-field="o.tipo_encuadernado"/>
+                    </t>
+                </div>
+                
+                <div style="margin-top:10px">
+                    <strong>Acabados</strong><br/>
+                    <table>
+                        <tr t-foreach="o.acabados" t-as="a">
+                            <td><span t-esc="a.acabado_id.acabado + ' ' + a.acabado_id.tipo"/></td>
+                            <td><span t-field="a.display_datos"/></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div>
+                    <strong>Precios</strong><br/>
+                    <table >
+                        <tr>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Observaciones</th>
+                        </tr>
+                        <tr t-foreach="o.precios" t-as="p">
+                            <td><span t-field="p.cantidad"/></td>
+                            <td><span t-field="p.precio_unitario"/></td>
+                            <td><span t-field="p.observacion"/></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div>
+                    <strong>Validaciones</strong><br/>
+                    <table >
+                        <tr t-foreach="o.validaciones" t-as="v">
+                            <td><span t-field="v.user_id.name"/></td>
+                            <td><span t-field="v.create_date"/></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div>
+                    <strong>Observaciones</strong><br/>
+                    <p t-field="o.observaciones"/>
+                </div>
+                
+            </div>
+        </t>
+    </t>
+</template>
+</data>
+</openerp>

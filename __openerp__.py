@@ -31,6 +31,9 @@ Módulo para cotizar
         
         'data/eclipse.cotizacion.opcion.csv',
         
+        'report.xml',
+        'report_cotizacion.xml',
+        
         'eclipse_coti.xml',
         'papel_view.xml',
         'acabado_view.xml',

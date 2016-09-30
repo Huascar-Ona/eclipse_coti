@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <report
+            id="action_report_cotizacion"
+            model="eclipse.cotizacion"
+            string="Cotización"
+            report_type="qweb-html"
+            name="eclipse_coti.report_cotizacion"
+            file="eclipse_coti.report_cotizacion"
+        />
+        <record id="action_report_cotizacion" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="report.paperformat_us"/>
+        </record>
+    </data>
+</openerp>
