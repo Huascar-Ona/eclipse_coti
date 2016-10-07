@@ -44,6 +44,7 @@ class cotizacion(models.Model):
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
     
     #Opciones
+    descripcion = fields.Char(u"Descripción del proyecto", required=True, readonly=True, states={'draft':[('readonly',False)]})
     diseno = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Diseño", readonly=True, states={'draft':[('readonly',False)]})
     check_diseno = fields.Boolean(u"Check Diseño", readonly=True, states={'submitted':[('readonly',False)]})
     flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Flete Foráneo", readonly=True, states={'draft':[('readonly',False)]})
@@ -159,6 +160,16 @@ class cotizacion(models.Model):
 
     def write(self, cr, uid, ids, vals, context=None):
         this = self.browse(cr, uid, ids[0])
+        model_obj = self.pool.get("ir.model.data")
+        requisicion_group = model_obj.get_object(cr, uid, 'eclipse_coti', 'grupo_requisicion').id
+        cotizacion_group = model_obj.get_object(cr, uid, 'eclipse_coti', 'grupo_cotizacion').id
+        user_groups = self.pool.get("res.users").browse(cr, uid, uid).groups_id
+        user_groups = [x.id for x in user_groups]
+        vendedor = requisicion_group in user_groups
+        cotizador = cotizacion_group in user_groups
+        if vendedor and not cotizador:
+            if this.state != 'draft':
+                raise osv.except_osv("Error", u"Los vendedores no pueden editar ningún aspecto de la cotización una vez solicitada")
         if this.bloqueada and this.bloqueada.id != uid:
             raise osv.except_osv("Blouqeada", u"La cotización está bloqueada")
         return super(cotizacion, self).write(cr, uid, ids, vals, context=context)

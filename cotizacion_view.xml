@@ -93,8 +93,11 @@
                                 <field name="tel"/>
                             </group>
                         </group>
+                        <group string="Opciones del proceso">
+                                <field name="descripcion"/>
+                        </group>
                         <group>
-                            <group string="Opciones del proceso">
+                            <group>
                                 <label for="diseno"/>
                                 <div>
                                     <field name="diseno" class="oe_inline"/>
@@ -280,10 +283,10 @@
                             </group>
                         </group>
                         <div attrs="{'invisible':[('opcion3','=',False)]}">
-                            <group attrs="{'invisible':[('es_editorial','=',False)]}">
+                            <!--<group attrs="{'invisible':[('es_editorial','=',False)]}">
                                 <field name="tipo_encuadernado" style="width:33%"/>
                                 <field name="check_tipo_encuadernado" class="oe_inline" nolabel="1" states="submitted,validating"/>
-                            </group>
+                            </group>-->
                             <separator string="Acabados" colspan="2"/>
                             <field name="acabados" colspan="2">
                                 <tree string="Acabados">

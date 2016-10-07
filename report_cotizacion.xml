@@ -6,6 +6,7 @@
         <t t-foreach="docs" t-as="o">
             <style>
                 table{width:50%}
+                tr{border-bottom:1px solid silver}
             </style>
             <div class="page" style="font-size:x-small">
                 <h3>Cotización <span t-field="o.name"/></h3>
@@ -25,6 +26,11 @@
                         <strong>Tel. </strong><span t-field="o.tel"/><br/>
                     </div>
                 </div>
+                
+                <div>
+                    <strong>Descripción del proyecto </strong><span t-field="o.descripcion"/><br/>
+                </div>
+                
                 <div class="row" style="padding:10px 10px 10px 10px">
                     <div class="col-xs-3">
                         <strong>Diseño </strong><span t-field="o.diseno"/>
@@ -37,6 +43,17 @@
                     </div>
                     <div class="col-xs-3">
                         <strong>Subtipo </strong><span t-field="o.opcion3"/>
+                    </div>
+                </div>
+                <div class="row" style="padding:10px 10px 10px 10px">
+                    <div class="col-xs-4">
+                        <strong>Flete foráneo </strong><span t-field="o.flete"/>
+                    </div>
+                    <div class="col-xs-4">
+                        <strong>Costo </strong><span t-esc="o.costo_flete or '--'"/>
+                    </div>
+                    <div class="col-xs-4">
+                        <strong>Codigos Postales </strong><span t-esc="','.join([x.name for x in o.codigos_postales])"/>
                     </div>
                 </div>
                 
@@ -108,12 +125,6 @@
                         </div>
                     </div>
                 </div> <!-- fin datos proceso -->
-                
-                <div>
-                    <t t-if="o.es_editorial">
-                        <strong>Tipo encuadernado </strong> <span t-field="o.tipo_encuadernado"/>
-                    </t>
-                </div>
                 
                 <div style="margin-top:10px">
                     <strong>Acabados</strong><br/>
