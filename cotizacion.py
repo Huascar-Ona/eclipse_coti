@@ -170,12 +170,16 @@ class cotizacion(models.Model):
         if vendedor and not cotizador:
             if this.state != 'draft':
                 raise osv.except_osv("Error", u"Los vendedores no pueden editar ningún aspecto de la cotización una vez solicitada")
-        if this.bloqueada and this.bloqueada.id != uid:
-            raise osv.except_osv("Blouqeada", u"La cotización está bloqueada")
+        if this.bloqueada and vals.get("bloqueada", None) != False and this.bloqueada.id != uid:
+            raise osv.except_osv("Bloqueada", u"La cotización está bloqueada")
         return super(cotizacion, self).write(cr, uid, ids, vals, context=context)
 
     def action_bloquear(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'bloqueada': uid})
+        return True
+
+    def action_desbloquear(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'bloqueada': False})
         return True
 
     def action_cancel(self, cr, uid, ids, context=None):

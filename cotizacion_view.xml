@@ -68,6 +68,8 @@
                         <button name="action_bloquear" groups="eclipse_coti.grupo_cotizacion" type="object"
                             string="Bloquear" attrs="{'invisible':['|', ('state','!=','submitted'), ('bloqueada','!=',False)]}"
                             confirm="Confirmar bloqueo de cotización (solo el usuario actual podrá trabajar en ella)"/>
+                        <button name="action_desbloquear" groups="eclipse_coti.grupo_cotizacion" type="object"
+                            string="Desbloquear" attrs="{'invisible':['|', ('state','!=','submitted'), ('bloqueada','=',False)]}"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet string="Cotización">
