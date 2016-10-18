@@ -327,6 +327,7 @@
                     <field name="precios" colspan="2">
                         <tree string="Precios" editable="bottom">
                             <field name="cantidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
+                            <field name="unidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
                             <field name="precio_unitario" attrs="{'invisible': [('state','in',('draft','submitted','validating'))]}" readonly="1"/>
                             <field name="observacion" readonly="1"/>
                             <field name="state" invisible="1"/>
@@ -346,6 +347,7 @@
                     <field name="precios" colspan="2">
                         <tree string="Precios" editable="bottom">
                             <field name="cantidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
+                            <field name="unidad" attrs="{'readonly': [('state','in',('submitted','validating','validated'))]}"/>
                             <field name="precio_unitario" attrs="{'readonly': [('state','in',('draft','validated'))]}"/>
                             <field name="observacion"/>
                             <field name="state" invisible="1"/>

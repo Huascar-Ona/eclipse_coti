@@ -337,6 +337,7 @@ class cotizacion_precio(models.Model):
 
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     cantidad = fields.Float("Cantidad", digits=(14,0), readonly=True, states={'draft':[('readonly',False)]})
+    unidad = fields.Char("Unidad", readonly=True, states={'draft':[('readonly',False)]})
     precio_unitario = fields.Float("Precio Unitario", digits=(14,4), readonly=True, states={'validating':[('readonly',False)],'submitted':[('readonly',False)]})
     observacion = fields.Text(u"Observación", readonly=True, states={'draft':[('readonly',False)],'submitted':[('readonly',False)],'validating':[('readonly',False)]})
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
