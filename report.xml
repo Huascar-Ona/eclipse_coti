@@ -12,5 +12,16 @@
         <record id="action_report_cotizacion" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="report.paperformat_us"/>
         </record>
+        <report
+            id="action_report_cartacotizacion"
+            model="eclipse.cotizacion"
+            string="Carta cotización"
+            report_type="qweb-html"
+            name="eclipse_coti.report_cartacotizacion"
+            file="eclipse_coti.report_cartacotizacion"
+        />
+        <record id="action_report_cartacotizacion" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="report.paperformat_us"/>
+        </record>
     </data>
 </openerp>
