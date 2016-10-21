@@ -131,6 +131,7 @@ class cotizacion(models.Model):
     
     #Acabados
     #Ambos:
+    checks_acabados = fields.One2many("eclipse.cotizacion.check.acabado", "cotizacion_id", string="Checks Acabados", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     acabados = fields.One2many("eclipse.cotizacion.acabado.inst", "cotizacion_id", string="Acabados", readonly=True, states={'draft':[('readonly',False)]}, copy=True)
     #Solo Editorial:
     check_tipo_encuadernado = fields.Boolean(u"Check Tipo Encuadernado", readonly=True, states={'submitted':[('readonly',False)]})
@@ -239,7 +240,9 @@ class cotizacion(models.Model):
                 raise osv.except_osv(u"No se puede solicitar cotización", u"Debe haber por lo menos un acabado.")                
             if len(rec.precios) == 0:
                 raise osv.except_osv(u"No se puede solicitar cotización", u"No se ha ingresado ninguna cantidad a solicitar.")
-            self.write(cr, uid, ids, {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+            check_lines = [(0,0,{'check':False}) for acabado in rec.acabados]
+            self.write(cr, uid, ids, {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'checks_acabados': check_lines})
         return True
 
     def action_solicitar_validacion(self, cr, uid, ids, context=None):
@@ -325,6 +328,12 @@ class cotizacion(models.Model):
             if rec.state != 'draft':
                 raise osv.except_osv(u"Acción no permitida", u"No se pueden borrar cotizaciones a menos que estén en estado borrador")
         return super(cotizacion, self).unlink(cr, uid, ids, context=context)
+
+class cotizacion_check_acabado(osv.Model):
+    _name = "eclipse.cotizacion.check.acabado"
+
+    cotizacion_id = fields.Many2one("oisa.cotizacion", string=u"Cotización")
+    check = fields.Boolean("Check")
 
 class cotizacion_validacion(osv.Model):
     _name = "eclipse.cotizacion.validacion"

@@ -289,15 +289,25 @@
                                 <field name="tipo_encuadernado" style="width:33%"/>
                                 <field name="check_tipo_encuadernado" class="oe_inline" nolabel="1" states="submitted,validating"/>
                             </group>-->
-                            <separator string="Acabados" colspan="2"/>
-                            <field name="acabados" colspan="2">
-                                <tree string="Acabados">
-                                    <field name="state" invisible="1"/>
-                                    <field name="check" attrs="{'invisible':[('state','not in',('submitted','validating'))]}"/>
-                                    <field name="acabado_id"/>
-                                    <field name="display_datos"/>
-                                </tree>
-                            </field>
+                            <separator string="Acabados"/>
+                            <group>
+                                <group>
+                                    <field name="acabados" nolabel="1">
+                                        <tree string="Acabados">
+                                            <field name="state" invisible="1"/>
+                                            <field name="acabado_id"/>
+                                            <field name="display_datos"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <field name="checks_acabados" nolabel="1" states="submitted,validating">
+                                        <tree string="Checks" editable="bottom" create="0" delete="0">
+                                            <field name="check"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
                             
                             <separator string="Precios" colspan="2"/>
                             <field name="precios"/>
