@@ -11,19 +11,13 @@ OPCIONES_1 = {
     'Plotter': ['Producto']    
 }
 
-OPCIONES_2 = {
-    'Editorial': ['Catálogo', 'Block', 'Libro', 'Manual', 'Revista', 'Cuaderno', 'Libreta', 'Otro'],
-    'Producto': ['Caja', 'Cuadríptico', 'Díptico', 'Etiqueta', 'Flyer', 'Folder', 
-        'Volante', 'Encarte', 'Tríptico', 'Políptico', 'Póster', 'Dangler', 'Stopper', 'Cenefa', 
-        'Planilla de etiquetas', 'Colgante', 'Tarjeta', 'Separador', 'Collarín', 'Sobre', 'Otro']
-}
-
 OPCIONES_PLOTTER = ['Póster', 'Otro']
 
 class opcion(models.Model):
     _name = "eclipse.cotizacion.opcion"
     
     name = fields.Char("Nombre", required=True)
+    tipo = fields.Selection([("producto", "Producto"),("editorial","Editorial")], string="Tipo")
 
 class vendedor(models.Model):
     _name = "eclipse.vendedor"
@@ -75,8 +69,11 @@ class cotizacion(models.Model):
     ancho_final = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
     check_tintas = fields.Boolean(u"Check Tintas", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
-    tintas_a = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, required=True)
+    tintas_a = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     tintas_b = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    #Tintas digital
+    check_tintas_digital = fields.Boolean("Check tintas", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
+    tintas_digital = fields.Selection([("0x0","0x0"),("4x0","4x0"),("4x4","4x4")], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     #Barnices
     check_barniz_mate = fields.Boolean(u"Check Barniz Mate", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     barniz_mate_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
@@ -104,6 +101,9 @@ class cotizacion(models.Model):
     check_tintas_int = fields.Boolean(u"Check Tintas int", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     tintas_a_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
     tintas_b_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    #Tintas digital
+    check_tintas_digital_int = fields.Boolean("Check tintas int", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
+    tintas_digital_int = fields.Selection([("0x0","0x0"),("4x0","4x0"),("4x4","4x4")], string="Tintas int", readonly=True, states={'draft':[('readonly',False)]})
     #Barnices
     check_barniz_mate_int = fields.Boolean(u"Check Barniz mate int", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     barniz_mate_a_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
@@ -146,6 +146,10 @@ class cotizacion(models.Model):
     validaciones = fields.One2many("eclipse.cotizacion.validacion", "cotizacion_id", string="Validaciones",  states={'cancel':[('readonly',True)]})
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
         ('validating', 'Esperando validación'), ('validated', 'Validada'), ('cancel', 'Cancelada')], string="Estado", default="draft")
+
+    #Para cotizaciones de varios elementos
+    parent_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización padre")
+    child_ids = fields.One2many("eclipse.cotizacion", "parent_id", string="Elementos")
 
     _sql_constraints = [('unique_name', 'unique(name)', 'Folio repetido')]
 
@@ -211,10 +215,9 @@ class cotizacion(models.Model):
             opcion2 = opcion_obj.browse(cr, uid, opcion2).name
             #Abir subtipos de acuerdo al tipo seleccionado. Si es plotter usar las opciones de plotter
             if opcion1 == 'Plotter':
-                opciones = OPCIONES_PLOTTER
+                opcion3_ids = opcion_obj.search(cr, uid, [('name', 'in', OPCIONES_PLOTTER)])
             else:
-                opciones = OPCIONES_2[opcion2]
-            opcion3_ids = self.pool.get("eclipse.cotizacion.opcion").search(cr, uid, [('name', 'in', opciones)])
+                opcion3_ids = opcion_obj.search(cr, uid, [('tipo', 'ilike', opcion2)])
             es_editorial = opcion2 == 'Editorial'
             return {
                 'domain': {'opcion3': [('id', 'in', opcion3_ids)]},
@@ -329,10 +332,64 @@ class cotizacion(models.Model):
                 raise osv.except_osv(u"Acción no permitida", u"No se pueden borrar cotizaciones a menos que estén en estado borrador")
         return super(cotizacion, self).unlink(cr, uid, ids, context=context)
 
+    def default_get(self, cr, uid, fields, context=None):
+        res = super(cotizacion, self).default_get(cr, uid, fields, context=context)
+        for field in ("tiempo_de_entrega", "name", "atencion_a", "agente", "empresa", "tel", "parent_id"):
+            if field in context:
+                res[field] = context[field]
+        return res
+        
+    def action_new_element(self, cr, uid, ids, context=None):
+        this = self.browse(cr, uid, ids[0])
+        n = len(this.child_ids) + 2
+        new_name = this.name + "-" + str(n)
+        
+        ctx = dict(context)
+        ctx.update({
+            'tiempo_de_entrega': this.tiempo_de_entrega,
+            'atencion_a': this.atencion_a,
+            'tel': this.tel,
+            'empresa': this.empresa.id,
+            'agente': this.agente.id,
+            'name': new_name,
+            'parent_id': this.id
+        })
+        
+        model_obj = self.pool.get("ir.model.data")
+        view_form = model_obj.get_object(cr, uid, "eclipse_coti", "cotizacion_view_form").id
+
+        return {
+            'context': ctx,
+            'name': 'Nuevo elemento',
+            'type': 'ir.actions.act_window',
+            'res_model': 'eclipse.cotizacion',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'view_id': view_form,
+        }
+        
+    def action_view_elements(self, cr, uid, ids, context=None):
+        child_ids = self.search(cr, uid, [('parent_id','=',ids[0])])
+        model_obj = self.pool.get("ir.model.data")
+        view_tree = model_obj.get_object(cr, uid, "eclipse_coti", "cotizacion_view_tree").id
+        view_form = model_obj.get_object(cr, uid, "eclipse_coti", "cotizacion_view_form").id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Cotizaciones',
+            'res_model': 'eclipse.cotizacion',
+            'domain': [('id', 'in', ids + child_ids)],
+            'view_type': 'form',
+            'view_mode': 'list,form',
+            'views': [(view_tree, 'list'), (view_form, 'form')],
+            'context': context
+        }
+
+
 class cotizacion_check_acabado(osv.Model):
     _name = "eclipse.cotizacion.check.acabado"
 
-    cotizacion_id = fields.Many2one("oisa.cotizacion", string=u"Cotización")
+    cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     check = fields.Boolean("Check")
 
 class cotizacion_validacion(osv.Model):

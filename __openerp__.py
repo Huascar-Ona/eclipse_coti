@@ -38,7 +38,8 @@ Módulo para cotizar
         'eclipse_coti.xml',
         'papel_view.xml',
         'acabado_view.xml',
-        'cotizacion_view.xml'
+        'opcion_view.xml',
+        'cotizacion_view.xml',
     ],
     'demo': [],
     'test': [],

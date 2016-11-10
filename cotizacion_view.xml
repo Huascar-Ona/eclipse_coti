@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
                 <tree string="Cotizaciones" colors="blue:state=='draft';green:state=='validated';lightgray:state=='cancel'">
                     <field name="name"/>
+                    <field name="parent_id"/>
                     <field name="fecha"/>
                     <field name="tiempo_de_entrega"/>
                     <field name="empresa"/>
@@ -81,8 +82,20 @@
                         <h1>
                             <label string="Requisición" attrs="{'invisible':[('state','!=','draft')]}"/>
                             <label string="Cotización" attrs="{'invisible':[('state','=','draft')]}"/>
-                            <field name="name" class="oe_inline" readonly="1"/>
+                            <field name="name" class="oe_inline"/>
                         </h1>
+                        <!--<button name="action_view_elements" string="Ver todos los elementos" type="object"
+                            attrs="{'invisible':[('child_ids','=',False)]}"/>-->
+                        <group>
+                        </group>
+                        <group>
+                            <field name="parent_id"/>
+                            <field name="child_ids" string="Todos los elementos">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </group>
                         <group string="Datos">
                             <group>
                                 <field name="fecha" readonly="1"/>
@@ -176,6 +189,7 @@
                                 </div>
                                 <label string="Tintas"/>
                                 <div>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="tintas_a_int" class="oe_inline"
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
                                     <label string="x" class="oe_inline"/>
@@ -183,15 +197,20 @@
                                         attrs="{'required': [('es_editorial','=',True)]}"/>
                                     <field name="check_tintas_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
-                                <label string="Barniz Máquina Mate"/>
-                                <div>
+                                <div attrs="{'invisible':[('es_digital','=',False)]}">
+                                    <field name="tintas_digital_int" class="oe_inline"/>
+                                    <field name="check_tintas_digital_int" class="oe_inline" states="submitted,validating"/>
+                                </div>
+                                </div>
+                                <label string="Barniz Máquina Mate" attrs="{'invisible':[('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="barniz_mate_a_int" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_mate_b_int" class="oe_inline"/>
                                     <field name="check_barniz_mate_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
-                                <label string="Barniz Máquina Brillante"/>
-                                <div>
+                                <label string="Barniz Máquina Brillante" attrs="{'invisible':[('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="barniz_brillante_a_int" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_brillante_b_int" class="oe_inline"/>
@@ -242,20 +261,26 @@
                                 </div>
                                 <label string="Tintas"/>
                                 <div>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="tintas_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
                                     <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)],'required': [('es_plotter','=',False)]}"/>
                                     <field name="check_tintas" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
-                                <label string="Barniz Máquina Mate"/>
-                                <div>
+                                <div attrs="{'invisible':[('es_digital','=',False)]}">
+                                    <field name="tintas_digital" class="oe_inline"/>
+                                    <field name="check_tintas_digital" class="oe_inline" states="submitted,validating"/>
+                                </div>
+                                </div>
+                                <label string="Barniz Máquina Mate" attrs="{'invisible':[('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="barniz_mate_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_mate_b" class="oe_inline"/>
                                     <field name="check_barniz_mate" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
-                                <label string="Barniz Máquina Brillante"/>
-                                <div>
+                                <label string="Barniz Máquina Brillante" attrs="{'invisible':[('es_digital','=',True)]}"/>
+                                <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="barniz_brillante_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
                                     <field name="barniz_brillante_b" class="oe_inline"/>
@@ -322,6 +347,8 @@
 
                             <separator string="Observaciones" colspan="2"/>
                             <field name="observaciones" colspan="2"/>
+                            
+                            <button name="action_new_element" string="Nuevo elemento" type="object"/>
                         </div>
                     </sheet>
                 </form>
