@@ -58,6 +58,19 @@ class instancia_acabado(models.Model):
     display_datos = fields.Text("Datos", compute="_get_display_datos")
     state = fields.Selection([('draft', 'Requisición'),('submitted', 'Esperando precio'),
         ('validating', 'Esperando validación'), ('validated', 'Validada')], related="cotizacion_id.state", string="Estado", default="draft")
+
+    def _check(self, cr, uid, ids, context=None):
+        for rec in self.browse(cr,uid,ids):
+            for dato in rec.datos:
+                if dato.tipo_dato == 'numero' and dato.numero <= 0:
+                    raise osv.except_osv("Datos incompletos en los acabados", u"Verificar que todos los datos numéricos son mayor a 0")
+                elif dato.tipo_dato == 'texto' and not dato.cadena:
+                    raise osv.except_osv("Datos incompletos en los acabados", u"Verificar que todos los datos de texto están llenos")
+                elif dato.tipo_dato == 'seleccion' and not dato.seleccion:
+                    raise osv.except_osv("Datos incompletos en los acabados", u"Verificar que todos los datos de selección están llenos")
+        return True
+        
+    _constraints = [(_check, "Datos incompletos en los acabados", ["datos"])]
     
     @api.depends("datos")
     def _get_display_datos(self):
@@ -94,3 +107,4 @@ class instancia_acabado_dato(models.Model):
     numero = fields.Float(u"Número")
     cadena = fields.Char("Texto")
     seleccion = fields.Many2one("eclipse.cotizacion.acabado.dato.opcion", string=u"Selección")
+            

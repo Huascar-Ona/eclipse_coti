@@ -90,9 +90,10 @@
                         </group>
                         <group>
                             <field name="parent_id"/>
-                            <field name="child_ids" string="Todos los elementos">
+                            <field name="child_ids" string="Todos los elementos" attrs="{'invisible':[('parent_id','!=',False)]}">
                                 <tree>
                                     <field name="name"/>
+                                    <field name="state"/>
                                 </tree>
                             </field>
                         </group>
@@ -190,11 +191,9 @@
                                 <label string="Tintas"/>
                                 <div>
                                 <div attrs="{'invisible':[('es_digital','=',True)]}">
-                                    <field name="tintas_a_int" class="oe_inline"
-                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="tintas_a_int" class="oe_inline"/>
                                     <label string="x" class="oe_inline"/>
-                                    <field name="tintas_b_int" class="oe_inline"
-                                        attrs="{'required': [('es_editorial','=',True)]}"/>
+                                    <field name="tintas_b_int" class="oe_inline"/>
                                     <field name="check_tintas_int" class="oe_inline" states="submitted,validating"/>
                                 </div>
                                 <div attrs="{'invisible':[('es_digital','=',False)]}">
@@ -264,7 +263,7 @@
                                 <div attrs="{'invisible':[('es_digital','=',True)]}">
                                     <field name="tintas_a" class="oe_inline"/>
                                     <label string="x" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
-                                    <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)],'required': [('es_plotter','=',False)]}"/>
+                                    <field name="tintas_b" class="oe_inline" attrs="{'invisible':[('es_plotter','=',True)]}"/>
                                     <field name="check_tintas" class="oe_inline" nolabel="1" states="submitted,validating"/> 
                                 </div>
                                 <div attrs="{'invisible':[('es_digital','=',False)]}">

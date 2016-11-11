@@ -341,8 +341,15 @@ class cotizacion(models.Model):
         
     def action_new_element(self, cr, uid, ids, context=None):
         this = self.browse(cr, uid, ids[0])
-        n = len(this.child_ids) + 2
-        new_name = this.name + "-" + str(n)
+
+        parent = this
+        while True:
+            if not parent.parent_id:
+                break
+            parent = parent.parent_id
+
+        n = len(parent.child_ids) + 2
+        new_name = parent.name + "-" + str(n)
         
         ctx = dict(context)
         ctx.update({
@@ -352,7 +359,7 @@ class cotizacion(models.Model):
             'empresa': this.empresa.id,
             'agente': this.agente.id,
             'name': new_name,
-            'parent_id': this.id
+            'parent_id': parent.id
         })
         
         model_obj = self.pool.get("ir.model.data")
