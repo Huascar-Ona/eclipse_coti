@@ -91,7 +91,7 @@
                         <group>
                             <field name="parent_id"/>
                             <field name="child_ids" string="Todos los elementos" attrs="{'invisible':[('parent_id','!=',False)]}">
-                                <tree>
+                                <tree create="false">
                                     <field name="name"/>
                                     <field name="state"/>
                                 </tree>

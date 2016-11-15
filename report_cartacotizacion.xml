@@ -37,13 +37,15 @@
                         <th>P.Unitario</th>
                         <th>Importe</th>
                     </tr>
-                    <tr style="font-size:small" t-foreach="o.precios" t-as="line">
-                        <td><span t-field="o.name"/></td>
-                        <td><span t-field="line.cantidad"/></td>
-                        <td><span t-field="line.unidad"/></td>
-                        <td><span t-field="o.descripcion"/></td>
-                        <td>$<span t-field="line.precio_unitario"/></td>
-                        <td>$<span t-esc="line.cantidad * line.precio_unitario"/></td>
+                    <tr style="font-size:small" t-foreach="[o] + [child for child in o.child_ids]" t-as="cot">
+                        <tr style="font-size:small" t-foreach="cot.precios" t-as="line">
+                            <td><span t-field="cot.name"/></td>
+                            <td><span t-field="line.cantidad"/></td>
+                            <td><span t-field="line.unidad"/></td>
+                            <td><span t-field="cot.descripcion"/></td>
+                            <td>$<span t-field="line.precio_unitario"/></td>
+                            <td>$<span t-esc="line.cantidad * line.precio_unitario"/></td>
+                        </tr>
                     </tr>
                 </table>
                 <div style="height:50px"></div>

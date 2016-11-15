@@ -165,6 +165,13 @@ class cotizacion(models.Model):
 
     def write(self, cr, uid, ids, vals, context=None):
         this = self.browse(cr, uid, ids[0])
+        if this.child_ids:
+            fields_shared = ["tiempo_de_entrega", "vendedor", "atencion_a", "empresa", "agente", "tel"]
+            vals_shared = {}
+            for field in fields_shared:
+                if field in vals:
+                    vals_shared[field] = vals[field]
+            self.write(cr, uid, [x.id for x in this.child_ids], vals_shared)
         model_obj = self.pool.get("ir.model.data")
         requisicion_group = model_obj.get_object(cr, uid, 'eclipse_coti', 'grupo_requisicion').id
         cotizacion_group = model_obj.get_object(cr, uid, 'eclipse_coti', 'grupo_cotizacion').id
@@ -180,14 +187,17 @@ class cotizacion(models.Model):
         return super(cotizacion, self).write(cr, uid, ids, vals, context=context)
 
     def action_bloquear(self, cr, uid, ids, context=None):
+        ids = self.extend_ids(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'bloqueada': uid})
         return True
 
     def action_desbloquear(self, cr, uid, ids, context=None):
+        ids = self.extend_ids(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'bloqueada': False})
         return True
 
     def action_cancel(self, cr, uid, ids, context=None):
+        ids = self.extend_ids(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'state': 'cancel'})
         return True
 
@@ -234,21 +244,32 @@ class cotizacion(models.Model):
                 'value': {'show_otro': show_otro}
             }
         return {}
+    
+    def extend_ids(self, cr, uid, ids, context=None):
+        res_ids = ids
+        this = self.browse(cr, uid, ids[0])
+        if this.child_ids:
+            res_ids.extend([x.id for x in this.child_ids])
+        elif this.parent_id:
+            raise osv.except_osv("Error", u"Esta función debe ser llamada desde la cotización padre")
+        return res_ids
         
     def action_solicitar_cotizacion(self, cr, uid, ids, context=None):
+        ids = self.extend_ids(cr, uid, ids, context=context)
         for rec in self.browse(cr, uid, ids):
             if rec.flete == 's' and rec.tienes_costo == 'n' and len(rec.codigos_postales) == 0:
-                raise osv.except_osv(u"No se puede solicitar cotización", u"No has ingresado por lo menos un código postal")
+                raise osv.except_osv(u"No se puede solicitar cotización %s"%rec.name, u"No has ingresado por lo menos un código postal")
             if len(rec.acabados) < 1:
-                raise osv.except_osv(u"No se puede solicitar cotización", u"Debe haber por lo menos un acabado.")                
+                raise osv.except_osv(u"No se puede solicitar cotización %s"%rec.name, u"Debe haber por lo menos un acabado.")                
             if len(rec.precios) == 0:
-                raise osv.except_osv(u"No se puede solicitar cotización", u"No se ha ingresado ninguna cantidad a solicitar.")
+                raise osv.except_osv(u"No se puede solicitar cotización %s"%rec.name, u"No se ha ingresado ninguna cantidad a solicitar.")
             check_lines = [(0,0,{'check':False}) for acabado in rec.acabados]
-            self.write(cr, uid, ids, {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            self.write(cr, uid, [rec.id], {'state': 'submitted', 'fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'checks_acabados': check_lines})
         return True
 
     def action_solicitar_validacion(self, cr, uid, ids, context=None):
+        ids = self.extend_ids(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'state': 'validating', 'bloqueada': False})
         return True
         
@@ -260,6 +281,7 @@ class cotizacion(models.Model):
         user_groups = [x.id for x in user.groups_id]
         adrian = user_obj.search(cr, uid, [('name', '=', 'Adrian Mees')])
         adrian = adrian[0] if adrian else 0
+        ids = self.extend_ids(cr, uid, ids, context=context)
         for id in ids:
             rec = self.browse(cr, uid, id)
             for cantidad in rec.precios:
@@ -327,6 +349,7 @@ class cotizacion(models.Model):
                 raise exceptions.ValidationError("El número de páginas debe ser mayor a cero")
 
     def unlink(self, cr, uid, ids, context=None):
+        ids = self.extend_ids(cr, uid, ids, context=context)
         for rec in self.browse(cr, uid, ids):
             if rec.state != 'draft':
                 raise osv.except_osv(u"Acción no permitida", u"No se pueden borrar cotizaciones a menos que estén en estado borrador")
