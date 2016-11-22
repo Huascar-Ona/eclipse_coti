@@ -13,6 +13,7 @@
                         border: 1px solid black;
                         padding: 2px 2px 2px 2px
                     }
+                    td{text-align:center}
                 </style>
                 <div class="row">
                     <div class="col-xs-4">
@@ -22,12 +23,12 @@
                         <p style="font-size:130%%"><strong>CARTA COTIZACIÓN</strong></p>
                     </div>
                     <div class="col-xs-4" style="vertical-align:top">
-                        Código: VEN-RG-01
+                        <strong>Código: VEN-RG-01</strong>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-4 col-xs-offset-8">
-                        México, CDMX, a <span t-usertime="%d de %B de %Y"/>
+                        <span style="font-size:70%">México, CDMX, a <span t-usertime="%d de %B de %Y"/></span>
                     </div>
                 </div>
                 <hr style="background-color:gray;height:2px;border:none;margin-top:0px"/>
@@ -54,7 +55,7 @@
                     <tr style="font-size:small" t-foreach="[o] + [child for child in o.child_ids]" t-as="cot">
                         <tr style="font-size:small" t-foreach="cot.precios" t-as="line">
                             <td><span t-field="cot.name"/></td>
-                            <td><span t-esc="'{0:,.2f}'.format(line.cantidad)"/></td>
+                            <td><span t-esc="'{0:,.0f}'.format(line.cantidad)"/></td>
                             <td><span t-field="line.unidad"/></td>
                             <td><span t-field="cot.descripcion"/></td>
                             <t t-if="not line.cotizacion_id.parent_id">
@@ -68,7 +69,7 @@
                 <div class="row">
                     <div class="col-xs-5">
                         <strong>Condiciones comerciales:</strong><br/>
-                        30 DÍAS
+                        <span t-field="o.empresa.condiciones"/>
                     </div>
                     <div class="col-xs-5">
                         <strong>Vigencia de esta cotización</strong>

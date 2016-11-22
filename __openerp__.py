@@ -40,6 +40,7 @@ Módulo para cotizar
         'acabado_view.xml',
         'opcion_view.xml',
         'cotizacion_view.xml',
+        'partner_view.xml'
     ],
     'demo': [],
     'test': [],

@@ -141,11 +141,13 @@
                     <table >
                         <tr>
                             <th>Cantidad</th>
+                            <th>Unidad</th>
                             <th>Precio</th>
                             <th>Observaciones</th>
                         </tr>
                         <tr t-foreach="o.precios" t-as="p">
                             <td><span t-field="p.cantidad"/></td>
+                            <td><span t-field="p.unidad"/></td>
                             <td><span t-field="p.precio_unitario"/></td>
                             <td><span t-field="p.observacion"/></td>
                         </tr>
