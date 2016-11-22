@@ -5,7 +5,7 @@
             id="action_report_cotizacion"
             model="eclipse.cotizacion"
             string="Cotización"
-            report_type="qweb-html"
+            report_type="qweb-pdf"
             name="eclipse_coti.report_cotizacion"
             file="eclipse_coti.report_cotizacion"
         />
@@ -16,7 +16,7 @@
             id="action_report_cartacotizacion"
             model="eclipse.cotizacion"
             string="Carta cotización"
-            report_type="qweb-html"
+            report_type="qweb-pdf"
             name="eclipse_coti.report_cartacotizacion"
             file="eclipse_coti.report_cartacotizacion"
         />

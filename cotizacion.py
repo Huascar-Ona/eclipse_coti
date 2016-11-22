@@ -38,7 +38,7 @@ class cotizacion(models.Model):
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
     
     #Opciones
-    descripcion = fields.Char(u"Descripción del proyecto", readonly=True, states={'draft':[('readonly',False)]})
+    descripcion = fields.Char(u"Descripción del proyecto")
     diseno = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Diseño", readonly=True, states={'draft':[('readonly',False)]})
     check_diseno = fields.Boolean(u"Check Diseño", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     flete = fields.Selection([("s", "Sí"), ("n", "No")], required=True, string=u"Flete Foráneo", readonly=True, states={'draft':[('readonly',False)]})
