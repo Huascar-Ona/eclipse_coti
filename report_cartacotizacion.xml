@@ -28,7 +28,9 @@
                 </div>
                 <div class="row">
                     <div class="col-xs-4 col-xs-offset-8">
-                        <span style="font-size:70%">México, CDMX, a <span t-usertime="%d de %B de %Y"/></span>
+                        <span style="font-size:70%">México, CDMX, a
+                        <span t-esc="time.strftime('%d de %B de %Y',time.strptime(o.fecha_validacion,'%Y-%m-%d %H:%M:%S'))"/>
+                        </span>
                     </div>
                 </div>
                 <hr style="background-color:gray;height:2px;border:none;margin-top:0px"/>

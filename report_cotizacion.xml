@@ -76,7 +76,12 @@
                                 <div class="col-xs-6">
                                     <span t-field="o.largo_ext_int"/> x <span t-field="o.ancho_ext_int"/><br/>
                                     <span t-field="o.largo_final_int"/> x <span t-field="o.ancho_final_int"/><br/>
-                                    <span t-field="o.tintas_a_int"/> x <span t-field="o.tintas_b_int"/><br/>
+                                    <t t-if="not o.es_digital">
+                                        <span t-field="o.tintas_a_int"/> x <span t-field="o.tintas_b_int"/><br/>
+                                    </t>
+                                    <t t-if="o.es_digital">
+                                        <span t-field="o.tintas_digital_int"/><br/>
+                                    </t>
                                     <span t-field="o.barniz_mate_a_int"/> x <span t-field="o.barniz_mate_b_int"/><br/>
                                     <span t-field="o.barniz_brillante_a_int"/> x <span t-field="o.barniz_brillante_b_int"/><br/>
                                     <span t-field="o.pantone_int"/><br/>
@@ -110,7 +115,12 @@
                             <div class="col-xs-6">
                                 <span t-field="o.largo_ext"/> x <span t-field="o.ancho_ext"/><br/>
                                 <span t-field="o.largo_final"/> x <span t-field="o.ancho_final"/><br/>
-                                <span t-field="o.tintas_a"/> x <span t-field="o.tintas_b"/><br/>
+                                <t t-if="not o.es_digital">
+                                    <span t-field="o.tintas_a"/> x <span t-field="o.tintas_b"/><br/>
+                                </t>
+                                <t t-if="o.es_digital">
+                                    <span t-field="o.tintas_digital"/><br/>
+                                </t>
                                 <span t-field="o.barniz_mate_a"/> x <span t-field="o.barniz_mate_b"/><br/>
                                 <span t-field="o.barniz_brillante_a"/> x <span t-field="o.barniz_brillante_b"/><br/>
                                 <span t-field="o.pantone"/><br/>

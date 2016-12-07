@@ -2,7 +2,7 @@
 from openerp import models, fields, api, exceptions
 from openerp.exceptions import ValidationError
 from openerp.osv import osv
-from datetime import datetime
+from datetime import datetime,timedelta
 from openerp import SUPERUSER_ID
 
 OPCIONES_1 = {
@@ -31,11 +31,22 @@ class cotizacion(models.Model):
     #Datos encabezado
     name = fields.Char(u"No. de cotización", required=True, default="/", readonly=True, states={'draft':[('readonly',False)]})
     fecha = fields.Datetime("Fecha de solicitud", readonly=True, states={'draft':[('readonly',False)]})
+    fecha_validacion = fields.Datetime(u"Fecha de validación", compute="get_fecha_validacion")
     tiempo_de_entrega = fields.Datetime("Fecha de entrega", readonly=True, states={'draft':[('readonly',False)]})
     agente = fields.Many2one("eclipse.vendedor", string="Agente", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     atencion_a = fields.Char(u"Atención a", readonly=True, states={'draft':[('readonly',False)]})
     empresa = fields.Many2one("res.partner", string="Empresa", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     tel = fields.Char(u"Tel", readonly=True, states={'draft':[('readonly',False)]})
+
+    @api.one
+    @api.depends("validaciones")
+    def get_fecha_validacion(self):
+        if not self.validaciones:
+            self.fecha_validacion = False
+        else:
+            fecha_utc = self.validaciones[-1].create_date
+            fecha_local = datetime.strptime(fecha_utc, "%Y-%m-%d %H:%M:%S") - timedelta(hours=6)
+            self.fecha_validacion = fecha_local
     
     #Opciones
     descripcion = fields.Char(u"Descripción del proyecto")
@@ -69,11 +80,11 @@ class cotizacion(models.Model):
     ancho_final = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]}, required=True)
     #Tintas a X b
     check_tintas = fields.Boolean(u"Check Tintas", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
-    tintas_a = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
-    tintas_b = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_a = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, copy=False)
+    tintas_b = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, copy=False)
     #Tintas digital
     check_tintas_digital = fields.Boolean("Check tintas", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
-    tintas_digital = fields.Selection([("0x0","0x0"),("4x0","4x0"),("4x4","4x4")], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_digital = fields.Selection([("0x0","0x0"),("4x0","4x0"),("4x4","4x4")], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, copy=False)
     #Barnices
     check_barniz_mate = fields.Boolean(u"Check Barniz Mate", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     barniz_mate_a = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
@@ -99,11 +110,11 @@ class cotizacion(models.Model):
     ancho_final_int = fields.Float("Ancho", readonly=True, states={'draft':[('readonly',False)]})
     #Tintas a X b
     check_tintas_int = fields.Boolean(u"Check Tintas int", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
-    tintas_a_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
-    tintas_b_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_a_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, copy=False)
+    tintas_b_int = fields.Selection([(x,x) for x in '0123456789'], string="Tintas", readonly=True, states={'draft':[('readonly',False)]}, copy=False)
     #Tintas digital
     check_tintas_digital_int = fields.Boolean("Check tintas int", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
-    tintas_digital_int = fields.Selection([("0x0","0x0"),("4x0","4x0"),("4x4","4x4")], string="Tintas int", readonly=True, states={'draft':[('readonly',False)]})
+    tintas_digital_int = fields.Selection([("0x0","0x0"),("4x0","4x0"),("4x4","4x4")], string="Tintas int", readonly=True, states={'draft':[('readonly',False)]}, copy=False)
     #Barnices
     check_barniz_mate_int = fields.Boolean(u"Check Barniz mate int", readonly=True, states={'submitted':[('readonly',False)]}, copy=False)
     barniz_mate_a_int = fields.Selection([(x,x) for x in '01'], string=u"Barniz máquina mate", readonly=True, states={'draft':[('readonly',False)]})
@@ -424,6 +435,7 @@ class cotizacion_check_acabado(osv.Model):
 
 class cotizacion_validacion(osv.Model):
     _name = "eclipse.cotizacion.validacion"
+    _order = "create_date"
     
     cotizacion_id = fields.Many2one("eclipse.cotizacion", string=u"Cotización")
     user_id = fields.Many2one("res.users", string="Validador")
