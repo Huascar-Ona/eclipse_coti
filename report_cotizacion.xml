@@ -90,7 +90,7 @@
                                         <span t-esc="o.papel_int.clasificacion + ' ' + o.papel_int.tipo + ' ' + str(o.papel_int.gramaje)"/>
                                     </t>
                                     <t t-if="not o.papel_int">
-                                        <span t.field="o.papel_otro_int"/>
+                                        <span t-esc="o.papel_otro_int"/>
                                     </t>
                                 </div>
                             </div>
@@ -128,8 +128,8 @@
                                 <t t-if="o.papel">
                                     <span t-esc="o.papel.clasificacion + ' ' + o.papel.tipo + ' ' + str(o.papel.gramaje)"/>
                                 </t>
-                                <t t-if="not o.papel_int">
-                                    <span t.field="o.papel_otro"/>
+                                <t t-if="not o.papel">
+                                    <span t-esc="o.papel_otro"/>
                                 </t>
                             </div>
                         </div>
