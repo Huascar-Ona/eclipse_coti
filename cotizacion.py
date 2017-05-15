@@ -182,7 +182,7 @@ class cotizacion(models.Model):
             for field in fields_shared:
                 if field in vals:
                     vals_shared[field] = vals[field]
-            self.write(cr, uid, [x.id for x in this.child_ids], vals_shared)
+            super(cotizacion, self).write(cr, uid, [x.id for x in this.child_ids], vals_shared)
         model_obj = self.pool.get("ir.model.data")
         requisicion_group = model_obj.get_object(cr, uid, 'eclipse_coti', 'grupo_requisicion').id
         cotizacion_group = model_obj.get_object(cr, uid, 'eclipse_coti', 'grupo_cotizacion').id
