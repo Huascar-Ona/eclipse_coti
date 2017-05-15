@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_cotizacionflete">
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <style>
+                table{width:50%}
+                tr{border-bottom:1px solid silver}
+            </style>
+            <div class="page" style="font-size:x-small">
+                <h3>Cotización <span t-field="o.name"/></h3>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <strong>Fecha de solicitud </strong><span t-field="o.fecha"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Fecha de entrega </strong><span t-field="o.tiempo_de_entrega"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Agente </strong><span t-field="o.agente"/><br/>
+                        <strong>Atención a </strong><span t-field="o.atencion_a"/><br/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Empresa </strong><span t-field="o.empresa"/><br/>
+                        <strong>Tel. </strong><span t-field="o.tel"/><br/>
+                    </div>
+                </div>
+                
+                <div>
+                    <strong>Descripción </strong>
+                    <p t-field="o.descripcion"/><br/>
+                </div>
+                
+                <div>
+                    <strong>Costo Flete </strong>
+                    $ <p t-field="o.costo_flete"/><br/>
+                </div>
+                
+            </div>
+        </t>
+    </t>
+</template>
+</data>
+</openerp>

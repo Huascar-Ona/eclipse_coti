@@ -34,6 +34,8 @@ Módulo para cotizar
         'report.xml',
         'report_cotizacion.xml',
         'report_cartacotizacion.xml',
+        'report_cotizacionflete.xml',
+        'report_cartacotizacionflete.xml',
         
         'eclipse_coti.xml',
         'papel_view.xml',

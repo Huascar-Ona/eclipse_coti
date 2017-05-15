@@ -23,5 +23,28 @@
         <record id="action_report_cartacotizacion" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="report.paperformat_us"/>
         </record>
+
+        <report
+            id="action_report_cotizacionflete"
+            model="eclipse.cotizacion.flete"
+            string="Cotización Flete"
+            report_type="qweb-pdf"
+            name="eclipse_coti.report_cotizacionflete"
+            file="eclipse_coti.report_cotizacionflete"
+        />
+        <record id="action_report_cotizacionflete" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="report.paperformat_us"/>
+        </record>
+        <report
+            id="action_report_cartacotizacionflete"
+            model="eclipse.cotizacion.flete"
+            string="Carta cotización flete"
+            report_type="qweb-pdf"
+            name="eclipse_coti.report_cartacotizacionflete"
+            file="eclipse_coti.report_cartacotizacionflete"
+        />
+        <record id="action_report_cartacotizacion" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="report.paperformat_us"/>
+        </record>
     </data>
 </openerp>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_cartacotizacionflete">
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <div class="page">
+                <style>
+                    th{
+                        font-size:80%;
+                        text-align:center;
+                        background-color:gray;
+                        border: 1px solid black;
+                        padding: 2px 2px 2px 2px
+                    }
+                    td{text-align:center}
+                </style>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <img style="height:80px" class="img img-responsive" src="/eclipse_coti/static/src/img/eclipse.png"/>
+                    </div>
+                    <div class="col-xs-4 center">
+                        <p style="font-size:130%%"><strong>CARTA COTIZACIÓN</strong></p>
+                    </div>
+                    <div class="col-xs-4" style="vertical-align:top">
+                        <strong>Código: VEN-RG-01</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4 col-xs-offset-8">
+                        <span style="font-size:70%">México, CDMX, a
+                        <span t-esc="time.strftime('%d de %B de %Y',time.strptime(o.fecha,'%Y-%m-%d %H:%M:%S'))"/>
+                        </span>
+                    </div>
+                </div>
+                <hr style="background-color:gray;height:2px;border:none;margin-top:0px"/>
+                <strong style="font-size:120%%" t-field="o.empresa"/><br/>
+                <strong t-field="o.empresa.street"/><br/>
+                <strong t-field="o.empresa.street2"/><br/>
+                <strong t-field="o.empresa.state_id.name"/><br/>
+                <div class="row">
+                    <div class="col-xs-4 col-xs-offset-8">
+                        At'n: <span t-field="o.atencion_a"/>
+                    </div>
+                </div>
+                <p>En respuesta a su amable petición, tenemos el gusto de ofrecerle la siguiente propuesta</p>
+                <div style="height:30px"></div>
+                <table style="width:100%%">
+                    <tr>
+                        <th style="width:500px">Descripción</th>
+                        <th style="width:100px">Importe</th>
+                    </tr>
+                    <tr>
+                        <td><span t-field="o.descripcion"/></td>
+                        <td>$<span t-field="o.costo_flete"/></td>
+                    </tr>
+                </table>
+                <div style="height:50px"></div>
+                <div class="row">
+                    <div class="col-xs-5">
+                        <strong>Condiciones comerciales:</strong><br/>
+                        <span t-field="o.empresa.condiciones"/>
+                    </div>
+                    <div class="col-xs-5">
+                        <strong>Vigencia de esta cotización</strong>
+                        15 días (A partir de recibirla)
+                    </div>
+                </div>
+                <br/><br/>
+                <strong>REQUISITOS Y ESTIPULACIONES<br/>
+                Muy importante: El cliente entregará:</strong>
+                <div style="margin-left:15px">
+                     * Documento electrónico en CD acompañado de pruebas láser a color<br/>
+                     * Programas Quark Express / Photoshop / Illustrator o Freehand en plataforma Macintosh<br/>
+                     * Resolución a 300 dpi (puntos por pulgada)<br/>
+                     <strong>Notas:</strong><br/>
+                     * Los precios anteriores no incluyen IVA <br/>
+                     * Los precios anteriores se indican con base en la cantidad descrita en la propuesta, cualquier cambio en el
+                     proceso o las cantidades pueden modificar el precio unitario<br/>
+                     * Por razones técnicas la cantidad a entregar en su pedido puede variar en +/- 10% en relación con la cantidad
+                     contratada ajustándose el importe a facturar de la misma manera<br/>
+                     * Esta cotización está sujeta a modificaciones en caso de que los costos de los insumos sufrieran cambios<br/>
+                     * El envío de sus materiales es únicamente en la Ciudad de México. (En caso de entrga foránea considerar un
+                     costo adicional a cotizar por separado de acuerdo al destino y al transportista).<br/>
+                     * De vernos favorecidos con este presupuesto, favor de enviar su orden de compra firmada y autorizada<br/>
+                     * A falta de pedido u orden de compra del cliente, la firma de aceptación de este presupuesto o el envío de su
+                     material representará un compromiso legal con todas las obligaciones inherentes a la operación.
+                </div>
+            </div>
+            <div class="footer text-center">
+                <div style="text-align:left">
+                    Sin más por el momento nos reiteramos a sus órdenes y querdamos a la espera de cualquier comentario adicional.
+                    <br/>
+                    <strong>
+                    A T E N T A M E N T E<br/>
+                    ING. ADRIAN MESS C.<br/>
+                    No. de referencia <span t-field="o.name"/>
+                    </strong>
+                </div>
+                <hr style="background-color:gray;height:2px;border:none"/>
+                <strong>Impresora Eclipse S.A. de C.V</strong><br/>
+                <p class="small">España 451 * Col. Granjas Estrellas * Iztapalapa * C.P. 09860 * México, D.F.<br/>
+                TELS/FAX:5426 2347 * 5426 9862 * 5426 9452 * 5443 3950</p>
+            </div>
+        </t>
+    </t>
+</template>
+</data>
+</openerp>
