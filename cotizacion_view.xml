@@ -110,7 +110,7 @@
                             </group>
                         </group>
                         <group string="Opciones del proceso">
-                                <field name="descripcion"/>
+                                <field name="descripcion" groups="eclipse_coti.grupo_requisicion"/>
                         </group>
                         <group>
                             <group>
