@@ -191,8 +191,8 @@ class cotizacion(models.Model):
         vendedor = requisicion_group in user_groups
         cotizador = cotizacion_group in user_groups
         if vendedor and not cotizador:
-            if this.state != 'draft':
-                raise osv.except_osv("Error", u"Los vendedores no pueden editar ningún aspecto de la cotización una vez solicitada")
+            if this.state != 'draft' and (len(vals) > 1 or list(vals.keys())[0] != 'descripcion'):
+                raise osv.except_osv("Error", u"Los vendedores no pueden editar ningún aspecto de la cotización una vez solicitada (a excepción de la descripción del proyecto. Si es el caso, favor de editar únicamente ese campo)")
         if this.bloqueada and vals.get("bloqueada", None) != False and this.bloqueada.id != uid:
             raise osv.except_osv("Bloqueada", u"La cotización está bloqueada")
         return super(cotizacion, self).write(cr, uid, ids, vals, context=context)
